@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="SkyRoute_API/SkyRoute_API.csproj" />
+  <Project Path="SkyRoute_Application/SkyRoute_Application.csproj" />
+  <Project Path="SkyRoute_Domain/SkyRoute_Domain.csproj" />
+  <Project Path="SkyRoute_Infrastructure/SkyRoute_Infrastructure.csproj" />
+</Solution>
