@@ -1,6 +1,6 @@
-﻿namespace SkyRoute_Domain.Entities
-{
-    public class FlightSearchResponseDTO
+﻿using SkyRoute_Domain.Entities;
+
+public class FlightSearchResponseDTO
     {
 
         public int Id { get; set; }
@@ -20,17 +20,26 @@
 
         public string CodeIATAOrigin { get; set; }
 
-        public Airport AirportOrigin { get; set; }
+        //public Airport AirportOrigin { get; set; }
+        public string CityOrigin {  get; set; }
+        public string CountryOrigin { get; set; }
 
         public string CodeIATADestination { get; set; }
 
-        public Airport AirportDestination { get; set; }
+        //public Airport AirportDestination { get; set; }
+
+        public string CityDestination {  get; set; }
+
+        public string CountryDestination {  get; set; }
 
         public decimal PricePerPerson { get; set; }
 
         public decimal PriceTotal { get; set; }
 
-        public decimal Passnegers {  get; set; }
+        public int SeatsTotal { get; set; }
+
+        public int SeatsFree { get; set; }
+
+        public int DurationMinutes { get; set; }
 
     }
-}

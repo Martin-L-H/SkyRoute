@@ -11,18 +11,16 @@ namespace SkyRoute_API
             //logging
             builder.Services.AddControllers();
             builder.Services.AddOpenApi();//or swagger
-            //JWT
+            //JWT goes here if we need to add user accounts
             builder.Services.AddAuthorization();
-            //Rate limit
+            //Rate limit, optional but needed if scaling up
             builder.Services.AddApplicationServices();
             builder.Services.AddCustomCors();
-            builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+            builder.Services.AddPooledDbContextFactory<AppDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
             var app = builder.Build();
             if (app.Environment.IsDevelopment())
             {
                 app.MapOpenApi();
-                //app.UseSwagger();
-                //app.UseSwaggerUI();
             }
             app.UseHttpsRedirection();
             //app.UseIpRateLimiting();

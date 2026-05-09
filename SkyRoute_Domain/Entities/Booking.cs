@@ -17,9 +17,14 @@
 
         public CabinType CabinType { get; set; }
 
-        public string JSONSnapshot { get; set; }
+        public int PassengerCount { get; set; }
+
+        public int FlightId { get; set; }
 
         //Navigation properties
+
+        public Flight Flight { get; set; }
+
         public List<Passenger> Passengers { get; set; }
 
     }

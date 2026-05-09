@@ -26,5 +26,11 @@
 
         public Airport AirportDestination { get; set; }
 
+        public int SeatsTotal { get; set; }
+
+        public int SeatsFree { get; set; }
+
+        public int DurationMinutes { get; set; }
+
     }
 }

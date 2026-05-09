@@ -2,7 +2,6 @@
 
 public interface IAirportRepository
 {
-    Task<IEnumerable<Airport>> GetAirportsAsync();
-    Task<IEnumerable<Airport>> GetAirportsWithDetailsAsync();
-    Task<Airport?> GetAirportByIdWithDetailsAsync(int id);
+    Task<IEnumerable<Airport>> GetAirportsWithDetailsAsync(string? cityName, string? countryName);
+    Task<Airport?> GetAirportByIATAWithDetailsAsync(string iata);
 }

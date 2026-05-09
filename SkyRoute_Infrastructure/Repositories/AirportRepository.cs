@@ -6,36 +6,50 @@ namespace SkyRoute_Infrastructure.Repositories
 {
     public class AirportRepository : IAirportRepository
     {
-        private readonly AppDbContext _context;
+        private readonly IDbContextFactory<AppDbContext> _contextFactory;
 
-        public AirportRepository(AppDbContext context)
+        public AirportRepository(IDbContextFactory<AppDbContext> context)
         {
-            _context = context;
+            _contextFactory = context;
         }
 
-        //DEBUGGER
-        public async Task<IEnumerable<Airport>> GetAirportsAsync()
+        public async Task<IEnumerable<Airport>> GetAirportsWithDetailsAsync(string cityName, string countryName)
         {
-            return await _context.Airports
+
+            using var context = await _contextFactory.CreateDbContextAsync();
+
+            IQueryable<Airport> query = context.Airports.AsNoTracking();
+
+            if (countryName != null)
+            {
+
+                query = query.Where(p => p.City.Country.Name == countryName);
+
+            }
+
+            if (cityName != null)
+            {
+
+                query = query.Where(p => p.City.Name == cityName);
+
+            }
+
+            return await query.ToListAsync();
+
+        }
+
+        public async Task<Airport?> GetAirportByIATAWithDetailsAsync(string iata)
+        {
+
+            using var context = await _contextFactory.CreateDbContextAsync();
+
+            IQueryable<Airport> query = context.Airports
                 .AsNoTracking()
-                .ToListAsync();
-        }
+                .Where(p => p.CodeIATA == iata)
+                .Include(p => p.City)
+                .ThenInclude(p => p.Country);
 
-        public async Task<IEnumerable<Airport>> GetAirportsWithDetailsAsync()
-        {
-            return await _context.Airports
-                .Include(a => a.City)
-                .ThenInclude(a => a.Country)
-                .AsNoTracking()
-                .ToListAsync();
-        }
-
-        public async Task<Airport?> GetAirportByIdWithDetailsAsync(int id)
-        {
-            return await _context.Airports
-                .Include(a => a.City)
-                .ThenInclude(c => c.Country)
-                .FirstOrDefaultAsync(a => a.Id == id);
+            return  await query.FirstOrDefaultAsync();
         }
     }
 }

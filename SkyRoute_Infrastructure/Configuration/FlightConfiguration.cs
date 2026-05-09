@@ -27,7 +27,10 @@ public class FlightConfiguration : IEntityTypeConfiguration<Flight>
                 TimeDeparture = DateTime.Parse("2026-06-01T10:00:00"),
                 TimeArrival = DateTime.Parse("2026-06-01T13:00:00"),
                 BaseFare = 150.00m,
-                CabinType = CabinType.Economy
+                CabinType = CabinType.Economy,
+                SeatsTotal = 20,
+                SeatsFree = 13,
+                DurationMinutes = 120
             },
             new Flight //INTERNATIONAL BUENOS AIRES TO RIO. COME TO BRAZIL!
             {
@@ -39,7 +42,10 @@ public class FlightConfiguration : IEntityTypeConfiguration<Flight>
                 TimeDeparture = DateTime.Parse("2026-06-02T15:00:00"),
                 TimeArrival = DateTime.Parse("2026-06-02T18:00:00"),
                 BaseFare = 200.00m,
-                CabinType = CabinType.Business
+                CabinType = CabinType.Business,
+                SeatsTotal = 140,
+                SeatsFree = 6,
+                DurationMinutes = 180
             }
         );
     }

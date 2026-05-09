@@ -2,7 +2,6 @@
 
 public interface IFlightRepository
 {
-    Task<IEnumerable<Flight>> GetFlightsAsync();
-    Task<IEnumerable<Flight>> SearchFlightsAsync(int originId, int destId, CabinType? cabinType, DateTime departureDate);
-    Task<Flight?> SearchFlightByNumberAsync(string flightNumber);
+    Task<IEnumerable<Flight>> SearchSpecificFlightsAsync(int? originId, int? destId, CabinType? cabinType, DateTime? departureDate, int? duration, int? minimumFreeSeats);
+    Task<Flight?> GetFlightByIdAsync(int flightId); //Used just for new bookings
 }

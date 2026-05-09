@@ -9,10 +9,19 @@ public class FlightSearchService : IFlightSearchService
         _providers = providers;
     }
 
+
     public async Task<IEnumerable<FlightSearchResponseDTO>> SearchAsync(FlightSearchRequestDTO request)
     {
+        var providersToRun = _providers;
 
-        var searchTasks = _providers.Select(provider => provider.GetFlightsAsync(request));
+        if (request.Provider != "All")
+        {
+
+            providersToRun = _providers.Where(p => p.ProviderName == request.Provider);
+
+        }
+
+        var searchTasks = providersToRun.Select(p => p.GetFlightsAsync(request));
 
         var resultsFromAllProviders = await Task.WhenAll(searchTasks);
 
@@ -20,5 +29,10 @@ public class FlightSearchService : IFlightSearchService
             .SelectMany(result => result)
             .OrderBy(f => f.TimeDeparture)
             .ToList();
+    }
+
+    public IEnumerable<string> GetAvailableProviders()
+    {
+        return _providers.Select(p => p.ProviderName).ToList();
     }
 }
