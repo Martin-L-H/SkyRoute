@@ -1,0 +1,70 @@
+<div class="home">
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-content">
+        <h1 class="hero-title">Find Your Perfect Flight</h1>
+        <p class="hero-subtitle">
+          Search, compare, and book flights from thousands of airlines worldwide. 
+          Get the best prices and travel with confidence.
+        </p>
+        <div class="hero-actions">
+          <a routerLink="/search" class="btn btn-primary btn-large">Search Flights</a>
+          <a routerLink="/flights" class="btn btn-secondary btn-large">My Bookings</a>
+        </div>
+      </div>
+      <div class="hero-image">
+        <div class="hero-plane">✈️</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features">
+    <div class="container">
+      <h2 class="section-title">Why Choose SkyRoute?</h2>
+      <div class="features-grid">
+        <div class="feature-card" *ngFor="let feature of features">
+          <div class="feature-icon">{{ feature.icon }}</div>
+          <h3 class="feature-title">{{ feature.title }}</h3>
+          <p class="feature-description">{{ feature.description }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Popular Destinations -->
+  <section class="destinations">
+    <div class="container">
+      <h2 class="section-title">Popular Destinations</h2>
+      <div class="destinations-grid">
+        <div class="destination-card" *ngFor="let destination of popularDestinations">
+          <div class="destination-image">{{ destination.image }}</div>
+          <div class="destination-info">
+            <h3 class="destination-city">{{ destination.city }}</h3>
+            <p class="destination-country">{{ destination.country }}</p>
+            <p class="destination-price">From {{ destination.price }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="destinations-actions">
+        <a routerLink="/search" class="btn btn-primary">Explore More Destinations</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta">
+    <div class="container">
+      <div class="cta-content">
+        <h2 class="cta-title">Ready to Take Off?</h2>
+        <p class="cta-subtitle">
+          Join thousands of travelers who trust SkyRoute for their flight bookings.
+        </p>
+        <div class="cta-actions">
+          <a routerLink="/search" class="btn btn-primary btn-large">Start Your Journey</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

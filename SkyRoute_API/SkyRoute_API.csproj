@@ -19,4 +19,8 @@
     <ProjectReference Include="..\SkyRoute_Infrastructure\SkyRoute_Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="ClientApp\" />
+  </ItemGroup>
+
 </Project>

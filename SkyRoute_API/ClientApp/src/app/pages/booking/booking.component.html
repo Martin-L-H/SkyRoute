@@ -1,0 +1,95 @@
+<div class="booking">
+  <div class="container">
+    <div class="page-header">
+      <h1 class="page-title">My Bookings</h1>
+      <p class="page-subtitle">Manage your flight bookings and reservations</p>
+    </div>
+
+    <div class="bookings-list">
+      <div class="booking-card" *ngFor="let booking of bookings" [class.selected]="selectedBooking?.id === booking.id" (click)="selectBooking(booking)">
+        <div class="booking-header">
+          <div class="booking-info">
+            <div class="confirmation-code">Confirmation: {{ booking.confirmationCode }}</div>
+            <div class="booking-date">Booked on {{ formatDate(booking.bookingDate) }}</div>
+          </div>
+          <div class="booking-status">
+            <span class="status-badge" [class]="getStatusClass(booking.status)">
+              {{ booking.status === 'confirmed' ? 'Confirmed' : booking.status === 'pending' ? 'Pending' : 'Cancelled' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="flight-summary">
+          <div class="airline-info">
+            <div class="flight-number">{{ booking.flight.flightNumber }}</div>
+            <div class="airline">{{ booking.flight.airline }}</div>
+          </div>
+          
+          <div class="route-info">
+            <div class="route">
+              <span class="airport">{{ booking.flight.from }}</span>
+              <span class="arrow">→</span>
+              <span class="airport">{{ booking.flight.to }}</span>
+            </div>
+            <div class="schedule">
+              <span class="time">{{ formatTime(booking.flight.departureTime) }}</span>
+              <span class="separator">-</span>
+              <span class="time">{{ formatTime(booking.flight.arrivalTime) }}</span>
+            </div>
+          </div>
+          
+          <div class="price-info">
+            <div class="passengers">{{ booking.passengers }} {{ booking.passengers === 1 ? 'Passenger' : 'Passengers' }}</div>
+            <div class="total-price">${{ booking.totalPrice }}</div>
+          </div>
+        </div>
+
+        <div class="booking-details" *ngIf="selectedBooking?.id === booking.id">
+          <div class="details-section">
+            <h3>Flight Details</h3>
+            <div class="detail-grid">
+              <div class="detail-item">
+                <span class="label">Flight Number:</span>
+                <span class="value">{{ booking.flight.flightNumber }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="label">Airline:</span>
+                <span class="value">{{ booking.flight.airline }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="label">Route:</span>
+                <span class="value">{{ booking.flight.from }} → {{ booking.flight.to }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="label">Departure:</span>
+                <span class="value">{{ formatDate(booking.flight.departureTime) }} at {{ formatTime(booking.flight.departureTime) }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="label">Arrival:</span>
+                <span class="value">{{ formatDate(booking.flight.arrivalTime) }} at {{ formatTime(booking.flight.arrivalTime) }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="label">Passengers:</span>
+                <span class="value">{{ booking.passengers }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="booking-actions">
+            <button class="btn btn-primary" (click)="modifyBooking(booking.id)">Modify Booking</button>
+            <button class="btn btn-secondary">Download Ticket</button>
+            <button class="btn btn-secondary">Email Confirmation</button>
+            <button class="btn btn-danger" (click)="cancelBooking(booking.id)" *ngIf="booking.status !== 'cancelled'">Cancel Booking</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="empty-state" *ngIf="bookings.length === 0">
+      <div class="empty-icon">📋</div>
+      <h2>No bookings found</h2>
+      <p>You don't have any flight bookings yet. Start searching for your next adventure!</p>
+      <a routerLink="/search" class="btn btn-primary">Search Flights</a>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,189 @@
+<div class="flights">
+  <div class="container">
+    <div class="page-header">
+      <h1 class="page-title">Flight Search</h1>
+      <p class="page-subtitle">Search and filter available flights</p>
+    </div>
+
+    <!-- Search Filters -->
+    <div class="search-filters">
+      <div class="filters-card">
+        <h2 class="filters-title">Filter Flights</h2>
+        <div class="filters-grid">
+          <!-- Provider Filter -->
+          <div class="filter-group">
+            <label class="filter-label">Provider</label>
+            <select class="form-select" [(ngModel)]="searchForm.provider" name="provider">
+              <option *ngFor="let provider of providers" [value]="provider">{{ provider }}</option>
+            </select>
+          </div>
+
+          <!-- Cabin Type Filter -->
+          <div class="filter-group">
+            <label class="filter-label">Cabin Class</label>
+            <select class="form-select" [(ngModel)]="searchForm.cabinType" name="cabinType">
+              <option *ngFor="let cabin of cabinTypes" [value]="cabin.value">{{ cabin.label }}</option>
+            </select>
+          </div>
+
+          <!-- Departure Time Filter -->
+          <div class="filter-group">
+            <label class="filter-label">Departure From</label>
+            <input type="datetime-local" class="form-input" [(ngModel)]="searchForm.timeDeparture" name="timeDeparture">
+          </div>
+
+          <!-- Origin Airport ID Filter -->
+          <div class="filter-group">
+            <label class="filter-label">Origin Airport ID</label>
+            <input type="number" class="form-input" [(ngModel)]="searchForm.airportOriginId" name="airportOriginId" placeholder="Airport ID">
+          </div>
+
+          <!-- Destination Airport ID Filter -->
+          <div class="filter-group">
+            <label class="filter-label">Destination Airport ID</label>
+            <input type="number" class="form-input" [(ngModel)]="searchForm.airportDestinationId" name="airportDestinationId" placeholder="Airport ID">
+          </div>
+
+          <!-- Minimum Seats Filter -->
+          <div class="filter-group">
+            <label class="filter-label">Minimum Free Seats</label>
+            <input type="number" class="form-input" [(ngModel)]="searchForm.minimumFreeSeats" name="minimumFreeSeats" placeholder="Min seats">
+          </div>
+
+          <!-- Duration Filter -->
+          <div class="filter-group">
+            <label class="filter-label">Max Duration (minutes)</label>
+            <input type="number" class="form-input" [(ngModel)]="searchForm.durationMinutes" name="durationMinutes" placeholder="Max duration">
+          </div>
+        </div>
+
+        <div class="filter-actions">
+          <button class="btn btn-primary" (click)="searchFlights()" [disabled]="isLoading">
+            {{ isLoading ? 'Searching...' : 'Search Flights' }}
+          </button>
+          <button class="btn btn-secondary" (click)="clearFilters()">Clear Filters</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div class="loading-state" *ngIf="isLoading">
+      <div class="loading-spinner"></div>
+      <p>Searching for flights...</p>
+    </div>
+
+    <!-- Flight Results -->
+    <div class="flights-list" *ngIf="flights$ | async as flights">
+      <div class="results-header" *ngIf="flights.length > 0">
+        <h2 class="results-title">Found {{ flights.length }} flights</h2>
+      </div>
+
+      <div class="flight-card" *ngFor="let flight of flights" [class.selected]="selectedFlight?.id === flight.id" (click)="selectFlight(flight)">
+        <div class="flight-header">
+          <div class="flight-info">
+            <div class="flight-number">{{ flight.flightNumber }}</div>
+            <div class="provider">{{ flight.providerName }}</div>
+          </div>
+          <div class="flight-price">
+            <span class="price">${{ flight.pricePerPerson }}</span>
+            <span class="price-label">per person</span>
+          </div>
+        </div>
+
+        <div class="flight-route">
+          <div class="route-info">
+            <div class="airport">{{ flight.codeIATAOrigin }}</div>
+            <div class="city">{{ flight.cityOrigin }}</div>
+            <div class="time">{{ formatTime(flight.timeDeparture) }}</div>
+            <div class="date">{{ formatDate(flight.timeDeparture) }}</div>
+          </div>
+          
+          <div class="route-arrow">
+            <span class="arrow">→</span>
+            <div class="duration">{{ flight.durationMinutes }} min</div>
+            <div class="cabin">{{ flight.cabinType }}</div>
+          </div>
+          
+          <div class="route-info">
+            <div class="airport">{{ flight.codeIATADestination }}</div>
+            <div class="city">{{ flight.cityDestination }}</div>
+            <div class="time">{{ formatTime(flight.timeArrival) }}</div>
+            <div class="date">{{ formatDate(flight.timeArrival) }}</div>
+          </div>
+        </div>
+
+        <div class="flight-seats">
+          <span class="seats-info">{{ flight.seatsFree }} of {{ flight.seatsTotal }} seats available</span>
+        </div>
+
+        <div class="flight-details" *ngIf="selectedFlight?.id === flight.id">
+          <div class="details-section">
+            <h3>Flight Details</h3>
+            <div class="detail-grid">
+              <div class="detail-item">
+                <span class="label">Flight Number:</span>
+                <span class="value">{{ flight.flightNumber }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="label">Provider:</span>
+                <span class="value">{{ flight.providerName }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="label">Route:</span>
+                <span class="value">{{ flight.codeIATAOrigin }} → {{ flight.codeIATADestination }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="label">Departure:</span>
+                <span class="value">{{ formatDate(flight.timeDeparture) }} at {{ formatTime(flight.timeDeparture) }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="label">Arrival:</span>
+                <span class="value">{{ formatDate(flight.timeArrival) }} at {{ formatTime(flight.timeArrival) }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="label">Duration:</span>
+                <span class="value">{{ flight.durationMinutes }} minutes</span>
+              </div>
+              <div class="detail-item">
+                <span class="label">Cabin:</span>
+                <span class="value">{{ flight.cabinType }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="label">Available Seats:</span>
+                <span class="value">{{ flight.seatsFree }} / {{ flight.seatsTotal }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="label">Price:</span>
+                <span class="value">${{ flight.pricePerPerson }} per person</span>
+              </div>
+              <div class="detail-item">
+                <span class="label">Total Price:</span>
+                <span class="value">${{ flight.priceTotal }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="flight-actions">
+            <button class="btn btn-primary" (click)="bookFlight(flight)">Book Flight</button>
+            <button class="btn btn-secondary">View Details</button>
+            <button class="btn btn-secondary">Add to Calendar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="!flights$ && !isLoading">
+      <div class="empty-icon">✈️</div>
+      <h2>No flights searched yet</h2>
+      <p>Use the filters above to search for available flights.</p>
+    </div>
+
+    <!-- No Results State -->
+    <div class="empty-state" *ngIf="flights$ | async as flights; flights.length === 0 && !isLoading">
+      <div class="empty-icon">🔍</div>
+      <h2>No flights found</h2>
+      <p>No flights match your search criteria. Try adjusting your filters.</p>
+    </div>
+  </div>
+</div>
