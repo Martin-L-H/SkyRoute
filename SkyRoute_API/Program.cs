@@ -10,7 +10,7 @@ namespace SkyRoute_API
             var builder = WebApplication.CreateBuilder(args);
             //logging
             builder.Services.AddControllers();
-            builder.Services.AddOpenApi(); //or swagger
+            builder.Services.AddOpenApi();//or swagger
             //JWT
             builder.Services.AddAuthorization();
             //Rate limit
