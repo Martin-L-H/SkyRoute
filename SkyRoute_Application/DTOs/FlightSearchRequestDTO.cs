@@ -1,27 +1,25 @@
-﻿using SkyRoute_Domain.Entities;
+﻿using System.ComponentModel.DataAnnotations;
+using SkyRoute_Domain.Entities;
 
 public class FlightSearchRequestDTO
-    {
-        public CabinType? cabinType {  get; set; }
+{
 
-        public DateTime? TimeDeparture { get; set; }
+    public CabinType? CabinType { get; set; }
 
-        public int? AirportOriginId { get; set; }
+    public DateTime? TimeDeparture { get; set; }
 
-        //public Airport? AirportOrigin { get; set; }
+    public int? AirportOriginId { get; set; }
 
-        public int? AirportDestinationId { get; set; }
+    public int? AirportDestinationId { get; set; }
 
-    public int? minimumFreeSeats { get; set; }
+    [Required]
+    [Range(1, int.MaxValue, ErrorMessage = "Minimum free seats must be at least 1")]
+    public int minimumFreeSeats { get; set; }
 
-        public string Provider {  get; set; }
+    [Required]
+    public string Provider { get; set; }
 
-        public int? DurationMinutes { get; set; }
+    [Range(1, int.MaxValue, ErrorMessage = "Duration must be positive")]
+    public int? DurationMinutes { get; set; }
 
-        //public Airport? AirportDestination { get; set; }
-
-        //public decimal PricePerPerson { get; set; }
-
-        //public decimal PriceTotal { get; set; }
-
-    }
+}

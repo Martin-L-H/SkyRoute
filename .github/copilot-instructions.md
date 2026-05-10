@@ -1,0 +1,4 @@
+# Copilot Instructions
+
+## Project Guidelines
+- User requires Angular frontend for SkyRoute flight booking system to: (1) Remove hardcoded data, (2) Call backend API endpoints properly (GET /flights, /airports, POST /bookings), (3) Implement cascade dropdowns: Country → City → Airport, (4) Filter flights by origin/destination, date, cabin type, provider (default "All"), passenger count (min 1), (5) Dynamically extract providers from flight results, (6) Run on HTTPS on localhost:7259/api (backend), (7) Update old Angular libraries to latest stable, (8) Ensure proper DTO matching with C# backend. The most critical feature is successful API connection.

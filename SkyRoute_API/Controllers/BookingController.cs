@@ -2,18 +2,18 @@
 
 [ApiController]
 [Route("api/[controller]")]
-public class BookingsController : ControllerBase
+public class BookingController : ControllerBase
 {
     private readonly IBookingService _bookingService;
 
-    public BookingsController(IBookingService bookingService)
+    public BookingController(IBookingService bookingService)
     {
 
         _bookingService = bookingService;
 
     }
 
-    [HttpPost] //Example: https://localhost:7259/api/bookings
+    [HttpPost] //Example: https://localhost:7259/api/booking
     public async Task<IActionResult> CreateBooking([FromBody] BookingRequestDTO request)
     { 
 
@@ -22,7 +22,7 @@ public class BookingsController : ControllerBase
         if (!response.Success)
         {
 
-            return NotFound(response.Message);
+            return BadRequest(response.Message);
 
         }
 

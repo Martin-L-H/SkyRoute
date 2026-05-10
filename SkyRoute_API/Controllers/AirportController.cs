@@ -4,27 +4,27 @@ using SkyRoute_Application.Interface;
 
 [ApiController]
 [Route("api/[controller]")]
-public class AirportsController : ControllerBase
+public class AirportController : ControllerBase
 {
 
     private readonly IAirportSearchService _airportService;
 
-    public AirportsController(IAirportSearchService airportService)
+    public AirportController(IAirportSearchService airportService)
     {
 
         _airportService = airportService;
 
     }
 
-    [HttpGet] //Example: https://localhost:7259/api/airports/ or https://localhost:7259/api/airports/?CityName=New york&CountryName=United states&AirportName=Kennedy
-    public async Task<IActionResult> GetAirports([FromQuery] AirportSearchRequestDTO request)
+    [HttpGet] //Example: https://localhost:7259/api/airport/ or https://localhost:7259/api/airport/?CityName=New york&CountryName=United states&AirportName=Kennedy
+    public async Task<IActionResult> GetAirport([FromQuery] AirportSearchRequestDTO request)
     {
 
         var response = await _airportService.GetAirportsWithDetailsAsync(request);
 
         if (!response.Success)
         {
-            return NotFound(response.Message);
+            return BadRequest(response.Message);
         }
 
         return Ok(response);
@@ -42,7 +42,7 @@ public class AirportsController : ControllerBase
 
         if (!response.Success)
         {
-            return NotFound(response.Message);
+            return BadRequest(response.Message);
         }
 
         return Ok(response);

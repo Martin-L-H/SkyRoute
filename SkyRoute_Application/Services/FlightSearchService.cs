@@ -18,13 +18,6 @@
 
         }
 
-        if (request.minimumFreeSeats == null)
-        {
-
-            request.minimumFreeSeats = 1;
-
-        }
-
         var validProviders = GetAvailableProviders();
 
         if (!validProviders.Contains(request.Provider) && request.Provider != "All")

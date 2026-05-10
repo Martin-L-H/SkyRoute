@@ -13,12 +13,10 @@
     public async Task<IEnumerable<FlightSearchResponseDTO>> GetFlightsAsync(FlightSearchRequestDTO requestDTO)
     {
 
-        decimal seatsRequested = (decimal)requestDTO.minimumFreeSeats; //Awful, I know, but because minimum seats is nullable it's required
-
         var rawFlights = await _flightRepo.SearchSpecificFlightsAsync(
             requestDTO.AirportOriginId,
             requestDTO.AirportDestinationId,
-            requestDTO.cabinType,
+            requestDTO.CabinType,
             requestDTO.TimeDeparture,
             requestDTO.DurationMinutes,
             requestDTO.minimumFreeSeats);
@@ -34,15 +32,15 @@
                 AirportOriginName = f.AirportOrigin?.PublicName ?? UNKNOWN_NAME,
                 AirportOriginId = f.AirportOriginId,
                 CityOriginName = f.AirportOrigin?.City?.Name ?? UNKNOWN_NAME,
-                CityOriginId = f.AirportOriginId,
+                CityOriginId = f.AirportOrigin?.City?.Id ?? 0,
                 CountryOriginName = f.AirportOrigin?.City?.Country?.Name ?? UNKNOWN_NAME,
-                CountryOriginId = f.AirportOrigin.City.CountryId,
+                CountryOriginId = f.AirportOrigin?.City?.CountryId ?? 0,
                 AirportDestinationId = f.AirportDestinationId,
                 CodeIATADestination = f.AirportDestination?.CodeIATA ?? UNKNOWN_NAME,
                 AirportDestinationName = f.AirportDestination?.PublicName ?? UNKNOWN_NAME,
-                CityDestinationId = f.AirportDestinationId,
+                CityDestinationId = f.AirportDestination?.City?.Id ?? 0,
                 CityDestinationName = f.AirportDestination?.City?.Name ?? UNKNOWN_NAME,
-                CountryDestinationId = f.AirportDestination.City.CountryId,
+                CountryDestinationId = f.AirportDestination?.City?.CountryId ?? 0,
                 CountryDestinationName = f.AirportDestination?.City?.Country?.Name ?? UNKNOWN_NAME,
                 TimeDeparture = f.TimeDeparture,
                 TimeArrival = f.TimeArrival,
@@ -52,7 +50,7 @@
                 SeatsFree = f.SeatsFree,
                 BaseFare = f.BaseFare,
                 PricePerPerson = GetPricingPerPerson(f.BaseFare),
-                PriceTotal = GetPricingPerPerson(f.BaseFare) * seatsRequested,
+                PriceTotal = GetPricingPerPerson(f.BaseFare) * requestDTO.minimumFreeSeats,
             });
     }
 

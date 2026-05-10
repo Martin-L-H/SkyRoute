@@ -20,7 +20,7 @@ public class CountryController : ControllerBase
 
         if (!response.Success)
         {
-            return NotFound(response.Message);
+            return BadRequest(response.Message);
         }
 
         return Ok(response);

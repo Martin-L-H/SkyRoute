@@ -33,7 +33,7 @@ public class AirportSearchService : IAirportSearchService
     public async Task<ServiceResponse<AirportSearchResponseDTO>> GetAirportByIATAWithDetailsAsync(AirportSearchRequestDTO request)
     {
 
-        if (request.CodeIATA == null || request.CodeIATA == "")
+        if (string.IsNullOrWhiteSpace(request.CodeIATA))
         {
             return ServiceResponse<AirportSearchResponseDTO>.BuildError("Invalid IATA code!");
         }

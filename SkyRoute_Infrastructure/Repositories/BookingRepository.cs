@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using SkyRoute_Domain.Entities;
 using SkyRoute_Infrastructure.Context;
 
@@ -6,11 +7,13 @@ public class BookingRepository : IBookingRepository
 {
 
     private readonly IDbContextFactory<AppDbContext> _contextFactory;
+    private readonly ILogger<BookingRepository> _logger;
 
-    public BookingRepository(IDbContextFactory<AppDbContext> contextFactory)
+    public BookingRepository(IDbContextFactory<AppDbContext> contextFactory, ILogger<BookingRepository> logger)
     {
 
         _contextFactory = contextFactory;
+        _logger = logger;
 
     }
 
@@ -29,6 +32,8 @@ public class BookingRepository : IBookingRepository
             if (flight == null || flight.SeatsFree < booking.PassengerCount)
 
             {
+
+                _logger.LogError("Repository: Flight not found or insufficient seats for booking {FlightId}", booking.FlightId);
 
                 return null;
 
@@ -49,7 +54,7 @@ public class BookingRepository : IBookingRepository
         {
             await transaction.RollbackAsync();
 
-            //I'd like to add a logging method here when I set it all up
+            _logger.LogError(e, "Repository: Exception during booking insertion for flight {FlightId}", booking.FlightId);
 
         }
 

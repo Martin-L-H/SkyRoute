@@ -2,16 +2,16 @@
 
 [ApiController]
 [Route("api/[controller]")]
-public class FlightsController : ControllerBase
+public class FlightController : ControllerBase
 {
     private readonly IFlightSearchService _flightService;
 
-    public FlightsController(IFlightSearchService flightService)
+    public FlightController(IFlightSearchService flightService)
     {
         _flightService = flightService;
     }
 
-    [HttpGet] //Example: https://localhost:7259/api/flights/?Provider=All or https://localhost:7259/api/flights/?Provider=BudgetWings&cabintype=Economy&airportoriginid=1
+    [HttpGet] //Example: https://localhost:7259/api/flight/?Provider=All or https://localhost:7259/api/flight/?Provider=BudgetWings&cabintype=Economy&airportoriginid=1
     public async Task<IActionResult> Search([FromQuery] FlightSearchRequestDTO request)
     {
 
@@ -20,7 +20,7 @@ public class FlightsController : ControllerBase
 
         if (!response.Success)
         {
-            return NotFound(response.Message);
+            return BadRequest(response.Message);
         }
 
         return Ok(response);

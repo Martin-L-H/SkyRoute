@@ -21,23 +21,23 @@ public class AirportRepository : IAirportRepository
             .Include(p => p.City)
             .ThenInclude(p => p.Country);
 
-        if (countryName != null && countryName != "")
+        if (!string.IsNullOrWhiteSpace(countryName))
         {
 
-            query = query.Where(p => p.City.Country.Name.Contains(countryName));
+            query = query.Where(p => EF.Functions.Like(p.City.Country.Name, $"%{countryName}%"));
 
         }
 
-        if (cityName != null && cityName != "")
+        if (!string.IsNullOrWhiteSpace(cityName))
         {
 
-            query = query.Where(p => p.City.Name.Contains(cityName));
+            query = query.Where(p => EF.Functions.Like(p.City.Name, $"%{cityName}%"));
 
         }
 
-        if (airportName != null && airportName != "")
+        if (!string.IsNullOrWhiteSpace(airportName))
         {
-            query = query.Where(p => p.PublicName.Contains(airportName));
+            query = query.Where(p => EF.Functions.Like(p.PublicName, $"%{airportName}%"));
         }
 
         return await query.ToListAsync();

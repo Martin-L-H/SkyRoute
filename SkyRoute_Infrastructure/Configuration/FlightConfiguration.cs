@@ -6,6 +6,11 @@ public class FlightConfiguration : IEntityTypeConfiguration<Flight>
 {
     public void Configure(EntityTypeBuilder<Flight> builder)
     {
+
+        builder.HasIndex(f => f.ProviderName).IsUnique(false);
+        builder.HasIndex(f => f.AirportOriginId).IsUnique(false);
+        builder.HasIndex(f => f.AirportDestinationId).IsUnique(false);
+
         builder.HasOne(f => f.AirportOrigin)
                 .WithMany()
                 .HasForeignKey(f => f.AirportOriginId)

@@ -1,23 +1,31 @@
-﻿using SkyRoute_Domain.Entities;
+﻿using Microsoft.Extensions.Logging;
+using SkyRoute_Domain.Entities;
 
 public class BookingService : IBookingService
 {
     private readonly IBookingRepository _bookingRepo;
     private readonly IFlightRepository _flightRepo;
     private readonly IEnumerable<IFlightProvider> _providers;
+    private readonly ILogger<BookingService> _logger;
+    private const int REFERENCE_CODE_LENGTH = 6;
+    public const string UNKNOWN_DATA = "Unknown";
 
-    public BookingService(IBookingRepository bookingRepo, IFlightRepository flightRepo, IEnumerable<IFlightProvider> providers)
+    public BookingService(IBookingRepository bookingRepo, IFlightRepository flightRepo, IEnumerable<IFlightProvider> providers, ILogger<BookingService> logger)
     {
         _bookingRepo = bookingRepo;
         _flightRepo = flightRepo;
         _providers = providers.ToList();
+        _logger = logger;
     }
 
     public async Task<ServiceResponse<BookingResponseDTO>> CreateBookingAsync(BookingRequestDTO request)
     {
 
+
         if (request == null || request.PassengerList == null || request.PassengerList.Count == 0)
         {
+
+            _logger.LogError($"Failed to create booking for flight, data error mismatch {request}");
 
             return ServiceResponse<BookingResponseDTO>.BuildError("Data error mismatch");
 
@@ -25,6 +33,8 @@ public class BookingService : IBookingService
 
         if (request.PassengerCount != request.PassengerList.Count)
         {
+
+            _logger.LogError($"Failed to create booking for flight, passenger count mismatch {request}");
 
             return ServiceResponse<BookingResponseDTO>.BuildError("Passenger count mismatch!");
 
@@ -35,6 +45,8 @@ public class BookingService : IBookingService
         if (provider == null)
         {
 
+            _logger.LogError($"Failed to create booking for flight, provider requested does not exist {request}");
+
             return ServiceResponse<BookingResponseDTO>.BuildError("The provider requested does not exist!");
 
         }
@@ -44,6 +56,8 @@ public class BookingService : IBookingService
         if (flightFound == null || flightFound.ProviderName != request.ProviderName)
         {
 
+            _logger.LogError($"Failed to create booking for flight, flight provider integrity mismatch {request}");
+
             return ServiceResponse<BookingResponseDTO>.BuildError("Flight provider integrity mismatch!");
 
         }
@@ -51,23 +65,34 @@ public class BookingService : IBookingService
         if (flightFound.SeatsFree < request.PassengerCount)
         {
 
+            _logger.LogError($"Failed to create booking for flight, not enough free seats in this plane {request}");
+
             return ServiceResponse<BookingResponseDTO>.BuildError("There are not enough free seats in this plane!");
 
         }
+        //Weird check, but copilot insisted that if I didn't put this here the isInternational bool check could throw a null reference exception
+        if (flightFound.AirportOrigin?.City?.Country == null || flightFound.AirportDestination?.City?.Country == null)
+        {
 
-        flightFound.SeatsFree = flightFound.SeatsFree - request.PassengerCount;
+            _logger.LogError($"Failed to create booking for flight, flight data is incomplete {request}");
+
+            return ServiceResponse<BookingResponseDTO>.BuildError("Flight data is incomplete!");
+
+        }
 
         bool isInternational = flightFound.AirportOrigin.City.CountryId != flightFound.AirportDestination.City.CountryId;
 
         if (isInternational && request.PassengerList.Any(p => p.IsPassport != true))
         {
 
+            _logger.LogError($"Failed to create booking for flight, not all passengers in this international flight have passport {request}");
+
             return ServiceResponse<BookingResponseDTO>.BuildError("All passengers in an international flight are required to have a valid passport!");
 
         }
 
-        string referenceCode = Guid.NewGuid().ToString("N").Substring(0, 6).ToUpper();
-        
+        string referenceCode = Guid.NewGuid().ToString("N").Substring(0, REFERENCE_CODE_LENGTH).ToUpper();
+
         decimal finalPricePerPerson = provider.GetPricingPerPerson(flightFound.BaseFare);
         decimal priceTotal = finalPricePerPerson * request.PassengerCount;
 
@@ -81,7 +106,8 @@ public class BookingService : IBookingService
             IsInternational = isInternational,
             FlightDepartureTime = flightFound.TimeDeparture,
             CabinType = flightFound.CabinType,
-            Passengers = request.PassengerList.Select(p => new Passenger{
+            Passengers = request.PassengerList.Select(p => new Passenger
+            {
                 FirstName = p.FirstName,
                 LastName = p.LastName,
                 Email = p.Email,
@@ -90,16 +116,16 @@ public class BookingService : IBookingService
             }).ToList(),
         };
 
-        //The actual booking process goes here
         Booking? result = await _bookingRepo.CreateBookingAsync(booking);
 
-        if (result == null) 
+        if (result == null)
         {
+
+            _logger.LogError($"booking request valid but returned null from the repository {request}");
 
             return ServiceResponse<BookingResponseDTO>.BuildError("We were unable to register the booking!");
 
         }
-
         //Start building the DTO
         TimeSpan difference = flightFound.TimeArrival - flightFound.TimeDeparture; //Code to get the duration of the flight
 
@@ -115,17 +141,18 @@ public class BookingService : IBookingService
             FlightNumber = flightFound.FlightNumber,
             PriceTotal = result.PriceTotal,
 
-            AirportOriginName = flightFound.AirportOrigin.PublicName,
-            AirportOriginCode = flightFound.AirportOrigin.CodeIATA,
-            CityOrigin = flightFound.AirportOrigin.City.Name,
-            CountryOrigin = flightFound.AirportOrigin.City.Country.Name,
+            AirportOriginName = flightFound.AirportOrigin?.PublicName ?? UNKNOWN_DATA,
+            AirportOriginCode = flightFound.AirportOrigin?.CodeIATA ?? UNKNOWN_DATA,
+            CityOrigin = flightFound.AirportOrigin?.City?.Name ?? UNKNOWN_DATA,
+            CountryOrigin = flightFound.AirportOrigin?.City?.Country?.Name ?? UNKNOWN_DATA,
 
-            AirportDestinyName = flightFound.AirportDestination.PublicName,
-            AirportDestinyCode = flightFound.AirportDestination.CodeIATA,
-            CityDestiny = flightFound.AirportDestination.City.Name,
-            CountryDestiny = flightFound.AirportDestination.City.Country.Name
+            AirportDestinyName = flightFound.AirportDestination?.PublicName ?? UNKNOWN_DATA,
+            AirportDestinyCode = flightFound.AirportDestination?.CodeIATA ?? UNKNOWN_DATA,
+            CityDestiny = flightFound.AirportDestination?.City?.Name ?? UNKNOWN_DATA,
+            CountryDestiny = flightFound.AirportDestination?.City?.Country?.Name ?? UNKNOWN_DATA
         };
 
         return ServiceResponse<BookingResponseDTO>.BuildSuccess(successBookingDTO);
+
     }
 }
