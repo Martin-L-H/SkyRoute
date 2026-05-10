@@ -14,7 +14,7 @@ public class BookingRepository : IBookingRepository
 
     }
 
-    public async Task<Booking> CreateBookingAsync(Booking booking)
+    public async Task<Booking?> CreateBookingAsync(Booking booking)
     {
 
         using var context = await _contextFactory.CreateDbContextAsync();
@@ -24,8 +24,7 @@ public class BookingRepository : IBookingRepository
         try
 
         {
-
-            Flight? flight = await context.Flights.Where(p => p.Id == booking.FlightId).FirstOrDefaultAsync();
+            Flight? flight = await context.Flights.Where(p => p.Id == booking.FlightId).FirstAsync();
 
             if (flight == null || flight.SeatsFree < booking.PassengerCount)
 
@@ -34,10 +33,10 @@ public class BookingRepository : IBookingRepository
                 return null;
 
             }
-
+            
             flight.SeatsFree = flight.SeatsFree - booking.PassengerCount;
 
-            await context.Bookings.AddAsync(booking);
+            context.Bookings.Add(booking);
 
             await context.SaveChangesAsync();
 

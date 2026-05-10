@@ -7,12 +7,17 @@ public class AirportSearchService : IAirportSearchService
     {
         _repository = repository;
     }
-    public async Task<IEnumerable<AirportSearchResponseDTO>> GetAirportsWithDetailsAsync(AirportSearchRequestDTO requestDTO)
+    public async Task<ServiceResponse<IEnumerable<AirportSearchResponseDTO>>> GetAirportsWithDetailsAsync(AirportSearchRequestDTO request)
     {
 
-        var airportList = await _repository.GetAirportsWithDetailsAsync(requestDTO.CountryName, requestDTO.CityName, requestDTO.AirportName);
+        var airportList = await _repository.GetAirportsWithDetailsAsync(request.CountryName, request.CityName, request.AirportName);
 
-        return airportList.Select(found => new AirportSearchResponseDTO
+        if (airportList == null || airportList.Count() == 0)
+        {
+            return ServiceResponse<IEnumerable<AirportSearchResponseDTO>>.BuildError("No airports were found!");
+        }
+
+        IEnumerable<AirportSearchResponseDTO> dtoList = airportList.Select(found => new AirportSearchResponseDTO
         {
             Id = found.Id,
             Name = found.PublicName ?? "Unknown",
@@ -23,20 +28,26 @@ public class AirportSearchService : IAirportSearchService
             CityId = found.City?.Id ?? 0
         });
 
+        return ServiceResponse<IEnumerable<AirportSearchResponseDTO>>.BuildSuccess(dtoList);
     }
-    public async Task<AirportSearchResponseDTO?> GetAirportByIATAWithDetailsAsync(string iata)
+    public async Task<ServiceResponse<AirportSearchResponseDTO>> GetAirportByIATAWithDetailsAsync(AirportSearchRequestDTO request)
     {
 
-        var found = await _repository.GetAirportByIATAWithDetailsAsync(iata);
+        if (request.CodeIATA == null || request.CodeIATA == "")
+        {
+            return ServiceResponse<AirportSearchResponseDTO>.BuildError("Invalid IATA code!");
+        }
+
+        var found = await _repository.GetAirportByIATAWithDetailsAsync(request.CodeIATA.ToUpper());
 
         if (found == null)
         {
 
-            return null;
+            return ServiceResponse<AirportSearchResponseDTO>.BuildError("No airport was found with this IATA code!");
 
         }
 
-        AirportSearchResponseDTO airportDTO = new AirportSearchResponseDTO()
+        AirportSearchResponseDTO response = new AirportSearchResponseDTO()
         {
             Id = found.Id,
             Name = found.PublicName,
@@ -46,7 +57,7 @@ public class AirportSearchService : IAirportSearchService
             CountryID = found.City?.CountryId ?? 0,
             CityId = found.City?.Id ?? 0
         };
-        
-        return airportDTO;
+
+        return ServiceResponse<AirportSearchResponseDTO>.BuildSuccess(response);
     }
 }

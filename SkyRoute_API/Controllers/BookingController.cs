@@ -8,35 +8,44 @@ public class BookingsController : ControllerBase
 
     public BookingsController(IBookingService bookingService)
     {
+
         _bookingService = bookingService;
+
     }
 
-    [HttpPost] //Example: 
-    public async Task<ActionResult<BookingResponseDTO>> CreateBooking([FromBody] BookingRequestDTO request)
-    {
+    [HttpPost] //Example: https://localhost:7259/api/bookings
+    public async Task<IActionResult> CreateBooking([FromBody] BookingRequestDTO request)
+    { 
 
-        if (request == null || request.PassengerList == null || request.PassengerList.Count == 0)
+        var response = await _bookingService.CreateBookingAsync(request);
+
+        if (!response.Success)
         {
 
-            return BadRequest("Invalid Request body, is null.");
-
-        }
-
-        if (request.PassengerCount != request.PassengerList.Count)
-        {
-            return BadRequest("Passenger count mismatch");
-        }
-
-
-        BookingResponseDTO response = await _bookingService.CreateBookingAsync(request);
-
-        if (response == null)
-        {
-
-            return BadRequest("Unable to process booking. Please check availability and try again.");
+            return NotFound(response.Message);
 
         }
 
         return Ok(response);
+
     }
 }
+
+/*
+
+{
+  "flightId": 2,
+  "providerName": "GlobalAir",
+  "passengerCount": 1,
+  "passengerList": [
+    {
+      "firstname": "John",
+      "lastname": "doe",
+      "email": "johndoe@example.com",
+      "documentNumber": "AB1234567",
+      "ispassport": true
+    }
+  ]
+}
+
+*/

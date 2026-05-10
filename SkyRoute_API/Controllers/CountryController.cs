@@ -14,15 +14,15 @@ public class CountryController : ControllerBase
     }
 
     [HttpGet] //Example: https://localhost:7259/api/country or https://localhost:7259/api/country/?Name=sil
-    public async Task<ActionResult<IEnumerable<CountryDTO>>> GetCountries([FromQuery] CountryDTO request)
+    public async Task<IActionResult> GetCountries([FromQuery] CountryDTO request)
     {
-        var countries = await _countryService.GetCountries(request);
+        var response = await _countryService.GetCountries(request);
 
-        if (countries == null || countries.Count() == 0)
+        if (!response.Success)
         {
-            return NotFound("No countries found!");
+            return NotFound(response.Message);
         }
 
-        return Ok(countries);
+        return Ok(response);
     }
 }

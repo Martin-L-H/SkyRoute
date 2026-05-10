@@ -15,7 +15,7 @@
 
         public string DocumentNumber { get; set; }
 
-        public Booking Booking { get; set; } //Unsure if this needs to be here, but its used for the builder of the entity framework
+        public Booking Booking { get; set; }
 
         public bool IsPassport { get; set; }
 

@@ -1,4 +1,4 @@
 ﻿public interface ICountryService
 {
-    Task<IEnumerable<CountryDTO>> GetCountries(CountryDTO request);
+    Task<ServiceResponse<IEnumerable<CountryDTO>>> GetCountries(CountryDTO request);
 }

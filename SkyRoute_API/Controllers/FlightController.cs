@@ -12,49 +12,18 @@ public class FlightsController : ControllerBase
     }
 
     [HttpGet] //Example: https://localhost:7259/api/flights/?Provider=All or https://localhost:7259/api/flights/?Provider=BudgetWings&cabintype=Economy&airportoriginid=1
-    public async Task<ActionResult<IEnumerable<FlightSearchResponseDTO>>> Search([FromQuery] FlightSearchRequestDTO request)
+    public async Task<IActionResult> Search([FromQuery] FlightSearchRequestDTO request)
     {
 
-        if (request.AirportOriginId == request.AirportDestinationId && (request.AirportOriginId != null && request.AirportDestinationId != null))
+
+        var response = await _flightService.SearchAsync(request);
+
+        if (!response.Success)
         {
-
-            return BadRequest("Origin and Destination cannot be the same.");
-
+            return NotFound(response.Message);
         }
 
-        if (request.minimumFreeSeats == null)
-        {
-            request.minimumFreeSeats = 1;
-        }
-
-        var validProviders = _flightService.GetAvailableProviders();
-
-
-        if (request.Provider == "All")
-        {
-
-            var allResults = await _flightService.SearchAsync(request);
-            return Ok(allResults);
-
-        }
-
-        if (!validProviders.Contains(request.Provider))
-        {
-
-            return BadRequest(new{Message = $"'{request.Provider}' is not a valid provider."});
-
-        }
-
-        var results = await _flightService.SearchAsync(request);
-
-        if (results == null || results.Count() == 0)
-        {
-
-            return NotFound("No flights found for the selected criteria.");
-
-        }
-
-        return Ok(results);
+        return Ok(response);
 
     }
 }

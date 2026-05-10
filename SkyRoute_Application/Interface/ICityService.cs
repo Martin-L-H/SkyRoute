@@ -1,4 +1,4 @@
 ﻿public interface ICityService
 {
-    Task<IEnumerable<CityDTO>> GetCities(CityDTO request);
+    Task<ServiceResponse<IEnumerable<CityDTO>>> GetCities(CityDTO request);
 }

@@ -3,6 +3,6 @@
 public interface IBookingRepository
 {
     //Task<List<Booking>> GetAllBookingsAsync();
-    Task<Booking> CreateBookingAsync(Booking booking);
+    Task<Booking?> CreateBookingAsync(Booking booking);
     //Task<Booking?> GetByReferenceAsync(string referenceCode);
 }

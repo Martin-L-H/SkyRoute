@@ -14,15 +14,15 @@ public class CityController : ControllerBase
     }
 
     [HttpGet] //Example: https://localhost:7259/api/city or https://localhost:7259/api/city?Name=A&CountryName=A
-    public async Task<ActionResult<IEnumerable<CityDTO>>> GetCities([FromQuery] CityDTO request)
+    public async Task<IActionResult> GetCities([FromQuery] CityDTO request)
     {
-        var cities = await _cityService.GetCities(request);
+        var response = await _cityService.GetCities(request);
 
-        if (cities == null || cities.Count() == 0)
+        if (!response.Success)
         {
-            return NotFound("No cities found!");
+            return NotFound(response.Message);
         }
 
-        return Ok(cities);
+        return Ok(response);
     }
 }

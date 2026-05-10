@@ -2,8 +2,8 @@
 {
     public interface IAirportSearchService
     {
-        Task<IEnumerable<AirportSearchResponseDTO>> GetAirportsWithDetailsAsync(AirportSearchRequestDTO requestDTO);
+        Task<ServiceResponse<IEnumerable<AirportSearchResponseDTO>>> GetAirportsWithDetailsAsync(AirportSearchRequestDTO request);
 
-        Task<AirportSearchResponseDTO?> GetAirportByIATAWithDetailsAsync(string iata);
+        Task<ServiceResponse<AirportSearchResponseDTO>> GetAirportByIATAWithDetailsAsync(AirportSearchRequestDTO request);
     }
 }

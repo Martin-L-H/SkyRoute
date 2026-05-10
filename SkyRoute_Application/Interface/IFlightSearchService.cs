@@ -3,5 +3,5 @@
 public interface IFlightSearchService
 {
     IEnumerable<string> GetAvailableProviders();
-    Task<IEnumerable<FlightSearchResponseDTO>> SearchAsync(FlightSearchRequestDTO requestDTO);
+    Task<ServiceResponse<IEnumerable<FlightSearchResponseDTO>>> SearchAsync(FlightSearchRequestDTO request);
 }

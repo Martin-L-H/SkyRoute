@@ -1,4 +1,4 @@
 ﻿public interface IBookingService
 {
-    Task<BookingResponseDTO?> CreateBookingAsync(BookingRequestDTO request);
+    Task<ServiceResponse<BookingResponseDTO>> CreateBookingAsync(BookingRequestDTO request);
 }
