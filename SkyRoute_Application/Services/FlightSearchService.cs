@@ -1,6 +1,4 @@
-﻿using SkyRoute_Domain.Entities;
-
-public class FlightSearchService : IFlightSearchService
+﻿public class FlightSearchService : IFlightSearchService
 {
     private readonly IEnumerable<IFlightProvider> _providers;
 
@@ -17,7 +15,7 @@ public class FlightSearchService : IFlightSearchService
         if (request.Provider != "All")
         {
 
-            providersToRun = _providers.Where(p => p.ProviderName == request.Provider);
+            providersToRun = _providers.Where(p => p.Provider == request.Provider);
 
         }
 
@@ -33,6 +31,6 @@ public class FlightSearchService : IFlightSearchService
 
     public IEnumerable<string> GetAvailableProviders()
     {
-        return _providers.Select(p => p.ProviderName).ToList();
+        return _providers.Select(p => p.Provider).ToList();
     }
 }

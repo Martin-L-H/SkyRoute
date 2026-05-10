@@ -1,5 +1,4 @@
-﻿
-using SkyRoute_Domain.Entities;
+﻿using SkyRoute_Domain.Entities;
 
 public class FlightSearchRequestDTO
     {
@@ -13,11 +12,11 @@ public class FlightSearchRequestDTO
 
         public int? AirportDestinationId { get; set; }
 
-        public int? minimumFreeSeats { get; set; }
+    public int? minimumFreeSeats { get; set; }
 
         public string Provider {  get; set; }
 
-        public int DurationMinutes { get; set; }
+        public int? DurationMinutes { get; set; }
 
         //public Airport? AirportDestination { get; set; }
 

@@ -1,9 +1,9 @@
-﻿using SkyRoute_Domain.Entities;
-
-public class GlobalAirProvider : IFlightProvider
+﻿public class GlobalAirProvider : IFlightProvider
 {
     private readonly IFlightRepository _flightRepo;
-    public string ProviderName => "GlobalAir";
+    private const string PROVIDER_NAME = "GlobalAir";
+    private const string UNKNOWN_NAME = "Unknown";
+    public string Provider => PROVIDER_NAME;
 
     public GlobalAirProvider(IFlightRepository flightRepo)
     {
@@ -13,6 +13,7 @@ public class GlobalAirProvider : IFlightProvider
     public async Task<IEnumerable<FlightSearchResponseDTO>> GetFlightsAsync(FlightSearchRequestDTO requestDTO)
     {
 
+        decimal seatsRequested = (decimal)requestDTO.minimumFreeSeats; //Awful, I know, but because minimum seats is nullable it's required
 
         var rawFlights = await _flightRepo.SearchSpecificFlightsAsync(
             requestDTO.AirportOriginId, 
@@ -23,25 +24,37 @@ public class GlobalAirProvider : IFlightProvider
             requestDTO.minimumFreeSeats);
 
         return rawFlights
-            .Where(f => f.ProviderName == ProviderName)
+            .Where(f => f.ProviderName == PROVIDER_NAME)
             .Select(f => new FlightSearchResponseDTO
             {
                 Id = f.Id,
                 FlightNumber = f.FlightNumber,
-                ProviderName = this.ProviderName,
-                CodeIATAOrigin = f.AirportOrigin.CodeIATA,
-                CityOrigin = f.AirportOrigin?.City?.Name ?? "Unknown",
-                CountryOrigin = f.AirportOrigin?.City?.Country?.Name ?? "Unknown",
-                CodeIATADestination = f.AirportDestination.CodeIATA,
-                CityDestination = f.AirportDestination?.City?.Name ?? "Unkown",
-                CountryDestination = f.AirportDestination?.City?.Country?.Name ?? "Unkown",
+                ProviderName = PROVIDER_NAME,
+                CodeIATAOrigin = f.AirportOrigin?.CodeIATA ?? UNKNOWN_NAME,
+                AirportOriginName = f.AirportOrigin?.PublicName ?? UNKNOWN_NAME,
+                AirportOriginId = f.AirportOriginId,
+                CityOriginName = f.AirportOrigin?.City?.Name ?? UNKNOWN_NAME,
+                CountryOriginName = f.AirportOrigin?.City?.Country?.Name ?? UNKNOWN_NAME,
+                AirportDestinationId = f.AirportDestinationId,
+                CodeIATADestination = f.AirportDestination?.CodeIATA ?? UNKNOWN_NAME,
+                AirportDestinationName = f.AirportDestination?.PublicName ?? UNKNOWN_NAME,
+                CityDestinationName = f.AirportDestination?.City?.Name ?? UNKNOWN_NAME,
+                CountryDestinationName = f.AirportDestination?.City?.Country?.Name ?? UNKNOWN_NAME,
                 TimeDeparture = f.TimeDeparture,
                 TimeArrival = f.TimeArrival,
                 CabinType = f.CabinType,
                 DurationMinutes = f.DurationMinutes,
-                // Rule: Base + 15%
-                PricePerPerson = Math.Round(f.BaseFare * 1.15m, 2),
-                PriceTotal = Math.Round((decimal)((f.BaseFare * 1.15m) * requestDTO.minimumFreeSeats), 2)
+                SeatsTotal = f.SeatsTotal,
+                SeatsFree = f.SeatsFree,
+                BaseFare = f.BaseFare,
+                PricePerPerson = GetPricingPerPerson(f.BaseFare),
+                PriceTotal = GetPricingPerPerson(f.BaseFare) * seatsRequested,
             });
+    }
+
+    public decimal GetPricingPerPerson(decimal baseFare)
+    {
+        //15% overcharge over base price
+        return Math.Round(baseFare * 1.15m, 2);
     }
 }

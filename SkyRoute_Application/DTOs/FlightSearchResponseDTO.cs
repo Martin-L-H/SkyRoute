@@ -19,18 +19,22 @@ public class FlightSearchResponseDTO
 
 
         public string CodeIATAOrigin { get; set; }
-
-        //public Airport AirportOrigin { get; set; }
-        public string CityOrigin {  get; set; }
-        public string CountryOrigin { get; set; }
-
+        public string AirportOriginName { get; set; }
+        public int AirportOriginId { get; set; }
+        public string CityOriginName {  get; set; }
+    public int CityOriginId { get; set; }
+        public string CountryOriginName { get; set; }
+    public int CountryOriginId { get; set; }
         public string CodeIATADestination { get; set; }
 
         //public Airport AirportDestination { get; set; }
+        public string AirportDestinationName {  get; set; }
+    public int AirportDestinationId { get; set; }
+    public int CityDestinationId { get; set; }
+        public string CityDestinationName {  get; set; }
 
-        public string CityDestination {  get; set; }
-
-        public string CountryDestination {  get; set; }
+        public string CountryDestinationName {  get; set; }
+    public int CountryDestinationId { get; set; }
 
         public decimal PricePerPerson { get; set; }
 

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { DtoUtilityService } from './dto-utility.service';
 
 @Injectable({
   providedIn: 'root'
@@ -11,12 +12,18 @@ export class ApiService {
     headers: new HttpHeaders({ 'Content-Type': 'application/json' })
   };
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private dtoUtility: DtoUtilityService
+  ) {}
 
   // Generic GET method
   get<T>(endpoint: string, params?: any): Observable<T> {
+    // Clean params to remove null/undefined/empty string values
+    const cleanParams = params ? this.dtoUtility.toQueryParams(params) : undefined;
+
     return this.http.get<T>(`${this.baseUrl}${endpoint}`, { 
-      params,
+      params: cleanParams,
       ...this.httpOptions 
     });
   }

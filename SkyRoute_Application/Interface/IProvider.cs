@@ -2,6 +2,7 @@
 
 public interface IFlightProvider
 {
-    string ProviderName { get; }
+    string Provider { get; }
     Task<IEnumerable<FlightSearchResponseDTO>> GetFlightsAsync(FlightSearchRequestDTO requestDTO);
+    decimal GetPricingPerPerson(decimal baseFare);
 }

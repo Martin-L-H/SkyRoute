@@ -57,12 +57,13 @@ export class SearchComponent {
     this.isLoading = true;
 
     const searchRequest: FlightSearchRequestDTO = {
-      cabinType: this.searchForm.class.charAt(0).toUpperCase() + this.searchForm.class.slice(1) as 'Economy' | 'Business' | 'First',
-      timeDeparture: this.searchForm.departureDate,
-      airportOriginId: this.searchForm.fromId,
-      airportDestinationId: this.searchForm.toId,
-      minimumFreeSeats: this.searchForm.passengers,
-      provider: 'All'
+      cabinType: this.searchForm.class ? this.searchForm.class.charAt(0).toUpperCase() + this.searchForm.class.slice(1) as any : undefined,
+      TimeDeparture: this.searchForm.departureDate || undefined,
+      AirportOriginId: this.searchForm.fromId || undefined,
+      AirportDestinationId: this.searchForm.toId || undefined,
+      minimumFreeSeats: this.searchForm.passengers || undefined,
+      DurationMinutes: undefined,
+      Provider: 'All'
     };
 
     this.searchResults$ = this.flightService.searchFlights(searchRequest);
@@ -96,10 +97,12 @@ export class SearchComponent {
   selectAirportByCode(airport: any, field: 'from' | 'to'): void {
     if (field === 'from') {
       this.searchForm.from = airport.codeIATA;
-      this.searchForm.fromId = airport.countryID; // Use countryID as airport ID
+      // Use the airport's ID if available, otherwise use codeIATA as fallback
+      this.searchForm.fromId = airport.id || airport.countryID;
     } else {
       this.searchForm.to = airport.codeIATA;
-      this.searchForm.toId = airport.countryID; // Use countryID as airport ID
+      // Use the airport's ID if available, otherwise use codeIATA as fallback
+      this.searchForm.toId = airport.id || airport.countryID;
     }
   }
 

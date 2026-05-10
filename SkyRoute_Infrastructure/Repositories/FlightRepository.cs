@@ -11,6 +11,19 @@ public class FlightRepository : IFlightRepository
         _contextFactory = context;
     }
 
+    public void FlightRestSeats(int flightId, int seatsBought)
+    {
+
+        using var context = _contextFactory.CreateDbContext();
+
+        Flight flight = context.Flights.Where(p => p.Id == flightId).First();
+
+        flight.SeatsFree = flight.SeatsFree - seatsBought;
+
+        context.SaveChanges();
+
+    }
+
     public async Task<Flight?> GetFlightByIdAsync(int flightId)
     {
 

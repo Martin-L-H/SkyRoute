@@ -5,13 +5,13 @@ import { ApiService } from './api.service';
 
 // Backend DTO interfaces matching the C# DTOs
 export interface FlightSearchRequestDTO {
-  cabinType?: 'Economy' | 'Business' | 'First';
-  timeDeparture?: string;
-  airportOriginId?: number;
-  airportDestinationId?: number;
-  minimumFreeSeats?: number;
-  provider?: string;
-  durationMinutes?: number;
+  cabinType?: 'Economy' | 'Premium' | 'Business' | 'First' | null;  // lowercase c matches backend
+  TimeDeparture?: string | null;  // Capital T matches backend
+  AirportOriginId?: number | null;  // Capital A matches backend
+  AirportDestinationId?: number | null;  // Capital A matches backend
+  minimumFreeSeats?: number | null;  // lowercase m matches backend
+  Provider?: string | null;  // Capital P matches backend
+  DurationMinutes?: number | null;  // Capital D matches backend
 }
 
 export interface FlightSearchResponseDTO {

@@ -11,7 +11,7 @@ public class BookingsController : ControllerBase
         _bookingService = bookingService;
     }
 
-    [HttpPost]
+    [HttpPost] //Example: 
     public async Task<ActionResult<BookingResponseDTO>> CreateBooking([FromBody] BookingRequestDTO request)
     {
 
@@ -22,6 +22,12 @@ public class BookingsController : ControllerBase
 
         }
 
+        if (request.PassengerCount != request.PassengerList.Count)
+        {
+            return BadRequest("Passenger count mismatch");
+        }
+
+
         BookingResponseDTO response = await _bookingService.CreateBookingAsync(request);
 
         if (response == null)
@@ -30,6 +36,7 @@ public class BookingsController : ControllerBase
             return BadRequest("Unable to process booking. Please check availability and try again.");
 
         }
+
         return Ok(response);
     }
 }

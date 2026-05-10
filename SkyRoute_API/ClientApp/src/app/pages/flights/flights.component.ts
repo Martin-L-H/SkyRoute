@@ -64,13 +64,13 @@ export class FlightsComponent {
     this.isLoading = true;
 
     const searchRequest: FlightSearchRequestDTO = {
-      provider: this.searchForm.provider,
-      cabinType: this.searchForm.cabinType as any || undefined,
-      timeDeparture: this.searchForm.timeDeparture || undefined,
-      airportOriginId: this.searchForm.airportOriginId || undefined,
-      airportDestinationId: this.searchForm.airportDestinationId || undefined,
+      Provider: this.searchForm.provider || undefined,
+      cabinType: this.searchForm.cabinType ? this.searchForm.cabinType as any : undefined,
+      TimeDeparture: this.searchForm.timeDeparture || undefined,
+      AirportOriginId: this.searchForm.airportOriginId || undefined,
+      AirportDestinationId: this.searchForm.airportDestinationId || undefined,
       minimumFreeSeats: this.searchForm.minimumFreeSeats || undefined,
-      durationMinutes: this.searchForm.durationMinutes || 0
+      DurationMinutes: this.searchForm.durationMinutes || undefined
     };
 
     this.flights$ = this.flightService.searchFlights(searchRequest);

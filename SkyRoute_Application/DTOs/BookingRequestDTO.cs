@@ -10,6 +10,7 @@ public class BookingRequestDTO
     [Required]
     public string ProviderName { get; set; }
 
+    [Required]
     public int PassengerCount { get; set; }
 
     [Required]

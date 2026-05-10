@@ -16,6 +16,7 @@ public class BookingRepository : IBookingRepository
 
     public async Task<Booking> CreateBookingAsync(Booking booking)
     {
+
         using var context = await _contextFactory.CreateDbContextAsync();
 
         using var transaction = await context.Database.BeginTransactionAsync();
@@ -44,7 +45,6 @@ public class BookingRepository : IBookingRepository
 
             return booking;
 
-            //I'd like to add a logging here when it's all set up
 
         } catch (Exception e)
         {
@@ -57,20 +57,4 @@ public class BookingRepository : IBookingRepository
         return null;
 
     }
-    /*
-    public async Task<List<Booking>> GetAllBookingsAsync()
-    {
-        return await _context.Bookings.AsNoTracking().ToListAsync();
-    }
-
-    
-
-    public async Task<Booking?> GetByReferenceAsync(string referenceCode)
-    {
-        return await _context.Bookings
-            .Include(b => b.Passengers)
-            .AsNoTracking()
-            .FirstOrDefaultAsync(b => b.ReferenceCode == referenceCode);
-    }
-    */
 }

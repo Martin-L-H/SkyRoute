@@ -7,18 +7,20 @@ public class AirportSearchService : IAirportSearchService
     {
         _repository = repository;
     }
-    public async Task<IEnumerable<AirportSearchResponseDTO>> GetAirportsWithDetailsAsync(string? cityName, string? countryName)
+    public async Task<IEnumerable<AirportSearchResponseDTO>> GetAirportsWithDetailsAsync(AirportSearchRequestDTO requestDTO)
     {
 
-        var airportList = await _repository.GetAirportsWithDetailsAsync(cityName, countryName);
+        var airportList = await _repository.GetAirportsWithDetailsAsync(requestDTO.CountryName, requestDTO.CityName, requestDTO.AirportName);
 
-        return airportList.Select(a => new AirportSearchResponseDTO
+        return airportList.Select(found => new AirportSearchResponseDTO
         {
-            Name = a.PublicName,
-            CodeIATA = a.CodeIATA,
-            CityName = a.City?.Name ?? "Unknown City",
-            CountryName = a.City?.Country?.Name ?? "Unknown Country",
-            CountryID = a.City?.CountryId ?? 0
+            Id = found.Id,
+            Name = found.PublicName ?? "Unknown",
+            CodeIATA = found.CodeIATA ?? "---",
+            CityName = found.City?.Name ?? "Unknown City",
+            CountryName = found.City?.Country?.Name ?? "Unknown Country",
+            CountryID = found.City?.CountryId ?? 0,
+            CityId = found.City?.Id ?? 0
         });
 
     }
@@ -36,11 +38,13 @@ public class AirportSearchService : IAirportSearchService
 
         AirportSearchResponseDTO airportDTO = new AirportSearchResponseDTO()
         {
+            Id = found.Id,
             Name = found.PublicName,
             CodeIATA = found.CodeIATA,
-            CityName = found.City?.Name ?? "Unknown",
-            CountryName = found.City?.Country?.Name ?? "Unknown",
-            CountryID = found.City?.CountryId ?? 0
+            CityName = found.City?.Name ?? "Unknown City",
+            CountryName = found.City?.Country?.Name ?? "Unknown Country",
+            CountryID = found.City?.CountryId ?? 0,
+            CityId = found.City?.Id ?? 0
         };
         
         return airportDTO;

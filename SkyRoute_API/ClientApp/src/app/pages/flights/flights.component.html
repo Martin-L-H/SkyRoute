@@ -180,10 +180,12 @@
     </div>
 
     <!-- No Results State -->
-    <div class="empty-state" *ngIf="flights$ | async as flights; flights.length === 0 && !isLoading">
-      <div class="empty-icon">🔍</div>
-      <h2>No flights found</h2>
-      <p>No flights match your search criteria. Try adjusting your filters.</p>
+    <div class="empty-state" *ngIf="flights$ | async as flights">
+      <div *ngIf="flights.length === 0 && !isLoading">
+        <div class="empty-icon">🔍</div>
+        <h2>No flights found</h2>
+        <p>No flights match your search criteria. Try adjusting your filters.</p>
+      </div>
     </div>
   </div>
 </div>

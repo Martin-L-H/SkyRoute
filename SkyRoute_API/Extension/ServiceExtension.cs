@@ -1,5 +1,4 @@
 ﻿using SkyRoute_Application.Interface;
-using SkyRoute_Infrastructure.Repositories;
 
 public static class ServiceExtensions
 {
@@ -14,6 +13,10 @@ public static class ServiceExtensions
         services.AddScoped<IBookingService, BookingService>();
         services.AddScoped<IAirportSearchService, AirportSearchService>();
         services.AddScoped<IAirportRepository, AirportRepository> ();
+        services.AddScoped<ICityRepository, CityRepository>();
+        services.AddScoped<ICityService, CityService>();
+        services.AddScoped<ICountryRepository, CountryRepository>();
+        services.AddScoped<ICountryService, CountryService>();
 
         return services;
     }

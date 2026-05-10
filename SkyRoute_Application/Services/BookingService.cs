@@ -4,25 +4,37 @@ public class BookingService : IBookingService
 {
     private readonly IBookingRepository _bookingRepo;
     private readonly IFlightRepository _flightRepo;
+    private readonly IEnumerable<IFlightProvider> _providers;
 
-    public BookingService(IBookingRepository bookingRepo, IFlightRepository flightRepo)
+    public BookingService(IBookingRepository bookingRepo, IFlightRepository flightRepo, IEnumerable<IFlightProvider> providers)
     {
         _bookingRepo = bookingRepo;
         _flightRepo = flightRepo;
+        _providers = providers.ToList();
     }
 
     public async Task<BookingResponseDTO?> CreateBookingAsync(BookingRequestDTO requestDTO)
     {
-        Flight? flightFound = await _flightRepo.GetFlightByIdAsync(requestDTO.FlightId);
 
-        if (flightFound == null)
+        var provider = _providers.FirstOrDefault(p => p.Provider.Equals(requestDTO.ProviderName, StringComparison.OrdinalIgnoreCase));
+
+        if (provider == null)
         {
 
             return null;
 
         }
 
-        if (requestDTO.PassengerList.Count != requestDTO.PassengerCount)
+        Flight? flightFound = await _flightRepo.GetFlightByIdAsync(requestDTO.FlightId);
+
+        if (flightFound == null || flightFound.ProviderName != requestDTO.ProviderName)
+        {
+
+            return null;
+
+        }
+
+        if (flightFound.SeatsFree < requestDTO.PassengerCount)
         {
             return null;
         }
@@ -30,12 +42,15 @@ public class BookingService : IBookingService
         bool isInternational = false;
 
         string referenceCode = Guid.NewGuid().ToString("N").Substring(0, 6).ToUpper();
-
-        decimal finalPrice = CalculateFinalPrice(flightFound.BaseFare, requestDTO.ProviderName, requestDTO.PassengerCount);
+        
+        decimal finalPricePerPerson = provider.GetPricingPerPerson(flightFound.BaseFare);
+        decimal priceTotal = finalPricePerPerson * requestDTO.PassengerCount;
 
         if (flightFound.AirportOrigin.City.CountryId != flightFound.AirportDestination.City.CountryId)
         {
+
             isInternational = true;
+
         }
 
         Booking booking = new Booking
@@ -43,7 +58,7 @@ public class BookingService : IBookingService
             ReferenceCode = referenceCode,
             FlightId = flightFound.Id,
             PassengerCount = requestDTO.PassengerCount,
-            PriceTotal = finalPrice,
+            PriceTotal = priceTotal,
             Provider = requestDTO.ProviderName,
             IsInternational = isInternational,
             FlightDepartureTime = flightFound.TimeDeparture,
@@ -56,7 +71,7 @@ public class BookingService : IBookingService
                 IsPassport = p.IsPassport
             }).ToList(),
         };
-
+        //The actual booking process goes here
         Booking result = await _bookingRepo.CreateBookingAsync(booking);
 
         if (result == null) 
@@ -65,9 +80,11 @@ public class BookingService : IBookingService
             return null;
 
         }
+        //Reduces the flight available seats to prevent overbooking
+        _flightRepo.FlightRestSeats(result.FlightId, result.PassengerCount);
 
-        //Code to get the duration of the flight
-        TimeSpan difference = flightFound.TimeArrival - flightFound.TimeDeparture;
+        //Start building the DTO
+        TimeSpan difference = flightFound.TimeArrival - flightFound.TimeDeparture; //Code to get the duration of the flight
 
         return new BookingResponseDTO
         {
@@ -91,14 +108,5 @@ public class BookingService : IBookingService
             CityDestiny = flightFound.AirportDestination.City.Name,
             CountryDestiny = flightFound.AirportDestination.City.Country.Name
         };
-    }
-
-    private decimal CalculateFinalPrice(decimal baseFare, string provider, int count)
-    {
-        decimal pricePerPerson = provider == "BudgetWings"
-            ? Math.Max(Math.Round(baseFare * 0.90m, 2), 29.99m)
-            : Math.Round(baseFare * 1.15m, 2);
-
-        return pricePerPerson * count;
     }
 }
