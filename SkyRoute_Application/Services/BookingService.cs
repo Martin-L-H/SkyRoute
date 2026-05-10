@@ -25,7 +25,9 @@ public class BookingService : IBookingService
 
         if (request.PassengerCount != request.PassengerList.Count)
         {
+
             return ServiceResponse<BookingResponseDTO>.BuildError("Passenger count mismatch!");
+
         }
 
         var provider = _providers.FirstOrDefault(p => p.Provider.Equals(request.ProviderName, StringComparison.OrdinalIgnoreCase));
@@ -59,7 +61,9 @@ public class BookingService : IBookingService
 
         if (isInternational && request.PassengerList.Any(p => p.IsPassport != true))
         {
+
             return ServiceResponse<BookingResponseDTO>.BuildError("All passengers in an international flight are required to have a valid passport!");
+
         }
 
         string referenceCode = Guid.NewGuid().ToString("N").Substring(0, 6).ToUpper();
