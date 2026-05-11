@@ -25,8 +25,9 @@ export class FlightSearchComponent implements OnInit {
   bookingLoading = signal(false);
   bookingSuccessData = signal<any | null>(null);
   showSuccessContent = signal(false);
+  errorMessage = signal<string | null>(null);
 
-  // Forms
+  // Search Form
   searchForm = this.fb.group({
     CountryOriginId: [null as number | null],
     CityOriginId: [null as number | null],
@@ -40,14 +41,17 @@ export class FlightSearchComponent implements OnInit {
     minimumFreeSeats: [1]
   });
 
+  // Booking Form
   bookingForm = this.fb.group({
     flightId: [null as number | null, Validators.required],
+    providerName: ['', Validators.required],
+    passengerCount: [0],
     passengerList: this.fb.array([])
   });
 
   formValues = toSignal(this.searchForm.valueChanges, { initialValue: this.searchForm.value });
+  bookingFormSignal = toSignal(this.bookingForm.valueChanges, { initialValue: this.bookingForm.value });
 
-  // Computed Results & Filtering
   flightResults = computed(() => {
     let list = [...this.rawFlights()];
     const filters = this.formValues();
@@ -80,7 +84,6 @@ export class FlightSearchComponent implements OnInit {
     return filtered;
   });
 
-  // Location UI Helpers
   originCountryVal = computed(() => this.formValues()?.CountryOriginId);
   originCityVal = computed(() => this.formValues()?.CityOriginId);
   destCountryVal = computed(() => this.formValues()?.CountryDestinationId);
@@ -128,10 +131,10 @@ export class FlightSearchComponent implements OnInit {
     return cityId ? airports.filter(a => a.cityId === cityId) : [];
   });
 
-  // Booking Logic
   get passengers() { return this.bookingForm.get('passengerList') as FormArray; }
 
   bookingTotalPrice = computed(() => {
+    this.bookingFormSignal();
     const flight = this.selectedFlight();
     const count = this.passengers.length;
     return (flight?.priceTotal || 0) * count;
@@ -168,9 +171,18 @@ export class FlightSearchComponent implements OnInit {
     }
   }
 
+  private updatePassengerCount() {
+    this.bookingForm.patchValue({
+      passengerCount: this.passengers.length
+    }, { emitEvent: false });
+  }
+
   goToBooking(flight: any) {
     this.selectedFlight.set(flight);
-    this.bookingForm.patchValue({ flightId: flight.id });
+    this.bookingForm.patchValue({
+      flightId: flight.id,
+      providerName: flight.providerName
+    });
     this.passengers.clear();
     this.addPassenger();
   }
@@ -181,19 +193,25 @@ export class FlightSearchComponent implements OnInit {
       lastname: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       documentNumber: ['', Validators.required],
-      ispassport: [false]
+      ispassport: [false] // Matches DTO key
     }));
+    this.updatePassengerCount();
+    this.bookingForm.updateValueAndValidity();
   }
 
   removePassenger(index: number) {
     if (this.passengers.length > 1) {
       this.passengers.removeAt(index);
+      this.updatePassengerCount();
+      this.bookingForm.updateValueAndValidity();
     }
   }
 
   confirmBooking() {
     if (this.bookingForm.invalid || this.bookingLoading()) return;
     this.bookingLoading.set(true);
+    this.updatePassengerCount();
+
     this.flightService.bookFlight(this.bookingForm.value).subscribe({
       next: (res) => {
         this.onSearch();
@@ -201,8 +219,21 @@ export class FlightSearchComponent implements OnInit {
         this.closeBooking();
         setTimeout(() => this.showSuccessContent.set(true), 50);
       },
+      error: (err) => {
+        const msg = typeof err.error === 'string' ? err.error : (err.error?.message || "An error occurred while processing your booking.");
+        this.errorMessage.set(msg);
+        this.bookingLoading.set(false);
+      },
       complete: () => this.bookingLoading.set(false)
     });
+  }
+
+  closeErrorPopup() {
+    const overlay = document.querySelector('.error-overlay');
+    if (overlay) overlay.classList.remove('active');
+    setTimeout(() => {
+      this.errorMessage.set(null);
+    }, 400);
   }
 
   closeBooking() { this.selectedFlight.set(null); this.bookingForm.reset(); }

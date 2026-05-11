@@ -152,14 +152,26 @@
     <div class="modal-content-grid">
       <div class="flight-summary-sidebar">
         <div class="summary-row">
+          <label>Provider</label>
+          <strong>{{ selectedFlight()?.providerName }}</strong>
+        </div>
+
+        <div class="summary-row">
           <label>Route</label>
           <strong>{{ selectedFlight()?.codeIATAOrigin }} &rarr; {{ selectedFlight()?.codeIATADestination }}</strong>
         </div>
+
         <div class="summary-row">
           <label>Departure</label>
           <span>{{ selectedFlight()?.timeDeparture | date:'EEEE, MMM d' }}</span>
           <span>{{ selectedFlight()?.timeDeparture | date:'HH:mm' }}</span>
         </div>
+
+        <div class="summary-row">
+          <label>Cabin Class</label>
+          <strong>{{ getCabinName(selectedFlight()?.cabinType) }}</strong>
+        </div>
+
         <div class="summary-row">
           <label>Total Price</label>
           <span class="price-val">${{ bookingTotalPrice() }}</span>
@@ -169,7 +181,7 @@
       <div class="passenger-form-area">
         <form [formGroup]="bookingForm">
           <div formArrayName="passengerList">
-            @for (p of passengers.controls; track $index) {
+            @for (p of passengers.controls; track p) {
             <div class="passenger-item-card" [formGroupName]="$index">
               <div class="passenger-header">
                 <strong>Passenger #{{ $index + 1 }}</strong>
@@ -179,16 +191,31 @@
               </div>
               <div class="passenger-grid">
                 <div class="input-wrap">
-                  <input placeholder="First Name" formControlName="firstname">
+                  <input placeholder="First Name" formControlName="firstname" [class.invalid-input]="p.get('firstname')?.invalid && p.get('firstname')?.touched">
                 </div>
                 <div class="input-wrap">
-                  <input placeholder="Last Name" formControlName="lastname">
+                  <input placeholder="Last Name" formControlName="lastname" [class.invalid-input]="p.get('lastname')?.invalid && p.get('lastname')?.touched">
                 </div>
                 <div class="input-wrap">
-                  <input placeholder="Email" formControlName="email">
+                  <input placeholder="Email" formControlName="email" [class.invalid-input]="p.get('email')?.invalid && p.get('email')?.touched">
+                  @if (p.get('email')?.invalid && p.get('email')?.touched) {
+                  <span class="error-text">Please enter a valid email</span>
+                  }
                 </div>
                 <div class="input-wrap">
-                  <input placeholder="ID / Document" formControlName="documentNumber">
+                  <input placeholder="ID / Document" formControlName="documentNumber" [class.invalid-input]="p.get('documentNumber')?.invalid && p.get('documentNumber')?.touched">
+                  @if (p.get('documentNumber')?.invalid && p.get('documentNumber')?.touched) {
+                  <span class="error-text">Required field</span>
+                  }
+                </div>
+
+                <!-- NEW: ispassport Toggle -->
+                <div class="input-wrap checkbox-wrap">
+                  <label class="check-container">
+                    <input type="checkbox" formControlName="ispassport">
+                    <span class="checkmark"></span>
+                    Document is a Passport
+                  </label>
                 </div>
               </div>
             </div>
@@ -215,6 +242,16 @@
     <h2>Booking Successful!</h2>
     <p>Your reservation has been confirmed.</p>
     <button class="search-btn" (click)="closeSuccessPopup()">Back to Search</button>
+  </div>
+</div>
+
+<!-- ERROR POPUP -->
+<div class="error-overlay" [class.active]="errorMessage()">
+  <div class="error-card">
+    <div class="error-icon">!</div>
+    <h2>Booking Failed</h2>
+    <p class="error-msg-body">{{ errorMessage() }}</p>
+    <button class="dismiss-btn" (click)="closeErrorPopup()">Dismiss</button>
   </div>
 </div>
 
@@ -250,6 +287,23 @@
     border: 1px solid #ddd;
   }
 
+  .invalid-input {
+    border-color: #dc3545 !important;
+    background-color: #fff8f8;
+  }
+
+  .error-text {
+    color: #dc3545;
+    font-size: 11px;
+    margin-top: 4px;
+    font-weight: 500;
+  }
+
+  .input-wrap {
+    display: flex;
+    flex-direction: column;
+  }
+
   .search-btn {
     margin-top: 20px;
     padding: 14px;
@@ -260,7 +314,12 @@
     cursor: pointer;
     width: 100%;
     font-weight: bold;
+    transition: background 0.2s;
   }
+
+    .search-btn:hover:not(:disabled) {
+      background: #0056b3;
+    }
 
   .flight-table {
     width: 100%;
@@ -320,9 +379,13 @@
     border-radius: 6px;
     cursor: pointer;
     font-weight: bold;
+    transition: background 0.2s;
   }
 
-  /* Modal Styles */
+    .book-btn:hover {
+      background: #218838;
+    }
+
   .modal-backdrop {
     position: fixed;
     inset: 0;
@@ -458,7 +521,12 @@
     padding: 10px 20px;
     border-radius: 6px;
     cursor: pointer;
+    transition: background 0.2s;
   }
+
+    .add-p-btn:hover {
+      background: #e2e2e2;
+    }
 
   .confirm-p-btn {
     background: #28a745;
@@ -467,34 +535,97 @@
     padding: 12px 30px;
     border-radius: 6px;
     font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
   }
 
-  .success-overlay {
+    .confirm-p-btn:hover:not(:disabled) {
+      background: #218838;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .confirm-p-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+  /* Toggle (Checkbox) Specific Styles */
+  .checkbox-wrap {
+    grid-column: span 2;
+    flex-direction: row !important;
+    align-items: center;
+    padding: 8px 0;
+    border-top: 1px dashed #eee;
+    margin-top: 10px;
+  }
+
+  .check-container {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    color: #555;
+    user-select: none;
+    gap: 12px;
+    margin: 0;
+  }
+
+    .check-container input {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      margin: 0;
+    }
+
+  /* OVERLAY STYLES */
+  .success-overlay, .error-overlay {
     position: fixed;
     inset: 0;
-    background: white;
-    z-index: 2000;
+    z-index: 3000;
     display: flex;
     align-items: center;
     justify-content: center;
     opacity: 0;
     visibility: hidden;
-    transition: 0.3s;
+    transition: opacity 0.4s ease, visibility 0.4s ease;
+    backdrop-filter: blur(8px);
   }
 
-    .success-overlay.active {
+  .success-overlay {
+    background: rgba(255, 255, 255, 0.95);
+  }
+
+  .error-overlay {
+    background: rgba(0, 0, 0, 0.85);
+  }
+
+    .success-overlay.active, .error-overlay.active {
       opacity: 1;
       visibility: visible;
     }
 
-  .success-card {
+  .success-card, .error-card {
     text-align: center;
+    padding: 40px;
+    border-radius: 20px;
+    max-width: 450px;
+    width: 90%;
+    transform: translateY(20px);
+    transition: transform 0.4s ease;
   }
 
-  .success-icon {
+  .error-card {
+    background: white;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+  }
+
+  .success-overlay.active .success-card, .error-overlay.active .error-card {
+    transform: translateY(0);
+  }
+
+  .success-icon, .error-icon {
     font-size: 50px;
-    color: #28a745;
-    border: 3px solid;
     width: 80px;
     height: 80px;
     border-radius: 50%;
@@ -502,5 +633,39 @@
     align-items: center;
     justify-content: center;
     margin: 0 auto 20px;
+    border: 3px solid;
+    font-weight: bold;
   }
+
+  .success-icon {
+    color: #28a745;
+  }
+
+  .error-icon {
+    color: #dc3545;
+    border-color: #dc3545;
+  }
+
+  .error-msg-body {
+    color: #444;
+    line-height: 1.5;
+    margin-bottom: 20px;
+    min-height: 1.2em;
+  }
+
+  .dismiss-btn {
+    width: 100%;
+    padding: 14px;
+    background: #343a40;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+    .dismiss-btn:hover {
+      background: #000;
+    }
 </style>
