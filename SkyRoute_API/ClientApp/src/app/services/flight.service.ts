@@ -1,7 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { map, Observable, tap } from 'rxjs';
-import { SearchInitResponse, SearchInitializationData } from '../models/search-init.model';
+import { SearchResponse, SearchInitializationData } from '../models/search-init.model';
 import { FlightResult, FlightSearchResponse } from '../models/flight-result.model';
 
 @Injectable({
@@ -16,7 +16,7 @@ export class FlightService {
   lastSearchCriteria = signal<any>(null);
 
   getSearchMetadata(): Observable<SearchInitializationData> {
-    return this.http.get<SearchInitResponse>(`${this.API_BASE}/SearchMetadata`).pipe(
+    return this.http.get<SearchResponse>(`${this.API_BASE}/SearchMetadata`).pipe(
       map(response => response.data),
       tap(data => this.initData.set(data))
     );
@@ -43,7 +43,6 @@ export class FlightService {
   }
 
   bookFlight(bookingData: any): Observable<any> {
-    // Ensure NO .pipe(tap(res => alert(...))) is here
     return this.http.post(`${this.API_BASE}/Booking`, bookingData);
   }
 

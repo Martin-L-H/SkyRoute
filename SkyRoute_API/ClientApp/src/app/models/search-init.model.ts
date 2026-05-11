@@ -1,24 +1,30 @@
-export interface Airport {
+export interface AirportSearchResponseDTO {
   id: number;
   name: string;
   codeIATA: string;
   cityName: string;
   cityId: number;
   countryName: string;
-  countryID: number;
+  countryId: number;
 }
-export interface CabinTypeLookup {
+
+export interface EnumDisplayDTO {
   id: number;
   name: string;
 }
+
 export interface SearchInitializationData {
-  airports: Airport[];
-  cabinTypes: CabinTypeLookup[];
+  airports: AirportSearchResponseDTO[];
+  cabinTypes: EnumDisplayDTO[];
   providers: string[];
 }
-export interface ServiceResponse<T> {
+
+// The generic base that allows 'data' to be flexible
+export interface BaseResponse<T> {
   data: T;
-  success: boolean;
-  message: string;
+  success?: boolean;
+  message?: string;
 }
-export type SearchInitResponse = ServiceResponse<SearchInitializationData>;
+
+// SearchResponse now specifically uses the initialization data type
+export type SearchResponse = BaseResponse<SearchInitializationData>;

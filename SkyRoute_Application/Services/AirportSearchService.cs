@@ -19,7 +19,7 @@ public class AirportSearchService : IAirportSearchService
             CodeIATA = found.CodeIATA ?? "---",
             CityName = found.City?.Name ?? "Unknown City",
             CountryName = found.City?.Country?.Name ?? "Unknown Country",
-            CountryID = found.City?.CountryId ?? 0,
+            CountryId = found.City?.CountryId ?? 0,
             CityId = found.City?.Id ?? 0
         });
 
@@ -42,7 +42,7 @@ public class AirportSearchService : IAirportSearchService
             CodeIATA = found.CodeIATA ?? "---",
             CityName = found.City?.Name ?? "Unknown City",
             CountryName = found.City?.Country?.Name ?? "Unknown Country",
-            CountryID = found.City?.CountryId ?? 0,
+            CountryId = found.City?.CountryId ?? 0,
             CityId = found.City?.Id ?? 0
         });
 
@@ -73,7 +73,7 @@ public class AirportSearchService : IAirportSearchService
             CodeIATA = found.CodeIATA,
             CityName = found.City?.Name ?? "Unknown City",
             CountryName = found.City?.Country?.Name ?? "Unknown Country",
-            CountryID = found.City?.CountryId ?? 0,
+            CountryId = found.City?.CountryId ?? 0,
             CityId = found.City?.Id ?? 0
         };
 

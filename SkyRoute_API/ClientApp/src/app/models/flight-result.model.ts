@@ -1,4 +1,4 @@
-import { ServiceResponse } from './search-init.model';
+import { BaseResponse } from './search-init.model';
 
 export interface FlightResult {
   id: number;
@@ -35,5 +35,5 @@ export interface FlightResult {
   durationMinutes: number;
 }
 
-// Wrapper for the full API response
-export type FlightSearchResponse = ServiceResponse<FlightResult[]>;
+// Wrapper for the full API response - now compatible!
+export type FlightSearchResponse = BaseResponse<FlightResult[]>;

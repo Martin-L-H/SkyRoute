@@ -1,34 +1,175 @@
-<!-- RESULTS TABLE -->
-<div class="results-section">
-  @if (flightResults().length > 0) {
-  <table class="flight-table">
-    @for (flight of flightResults(); track flight.id) {
-    <tr>
-      <td>{{ flight.providerName }}</td>
-      <td>{{ flight.seatsFree }} seats left</td>
-      <td><button (click)="goToBooking(flight)">Book</button></td>
-    </tr>
+<div class="container">
+  <!-- SEARCH FORM SECTION -->
+  <div class="search-section">
+    <h2>Search Flights</h2>
+    <form [formGroup]="searchForm" (ngSubmit)="onSearch()">
+      <!-- Origin/Dest rows remain exactly as you provided -->
+      <div class="row">
+        <div class="col">
+          <label>Origin Country</label>
+          <select formControlName="CountryOriginId" (change)="searchForm.patchValue({CityOriginId: null, AirportOriginId: null})">
+            <option [ngValue]="null">All Countries</option>
+            @for (c of countries(); track c.id) {
+            <option [ngValue]="c.id">{{ c.name }}</option>
+            }
+          </select>
+          <label>City</label>
+          <select formControlName="CityOriginId" [disabled]="!searchForm.get('CountryOriginId')?.value" (change)="searchForm.patchValue({AirportOriginId: null})">
+            <option [ngValue]="null">All Cities</option>
+            @for (city of filteredOriginCities(); track city.id) {
+            <option [ngValue]="city.id">{{ city.name }}</option>
+            }
+          </select>
+          <label>Airport</label>
+          <select formControlName="AirportOriginId" [disabled]="!searchForm.get('CityOriginId')?.value">
+            <option [ngValue]="null">All Airports</option>
+            @for (a of filteredOriginAirports(); track a.id) {
+            <option [ngValue]="a.id">{{ a.name }} ({{ a.codeIATA }})</option>
+            }
+          </select>
+        </div>
+        <div class="col">
+          <label>Destination Country</label>
+          <select formControlName="CountryDestinationId" (change)="searchForm.patchValue({CityDestinationId: null, AirportDestinationId: null})">
+            <option [ngValue]="null">All Countries</option>
+            @for (c of countries(); track c.id) {
+            <option [ngValue]="c.id">{{ c.name }}</option>
+            }
+          </select>
+          <label>City</label>
+          <select formControlName="CityDestinationId" [disabled]="!searchForm.get('CountryDestinationId')?.value" (change)="searchForm.patchValue({AirportDestinationId: null})">
+            <option [ngValue]="null">All Cities</option>
+            @for (city of filteredDestCities(); track city.id) {
+            <option [ngValue]="city.id">{{ city.name }}</option>
+            }
+          </select>
+          <label>Airport</label>
+          <select formControlName="AirportDestinationId" [disabled]="!searchForm.get('CityDestinationId')?.value">
+            <option [ngValue]="null">All Airports</option>
+            @for (a of filteredDestAirports(); track a.id) {
+            <option [ngValue]="a.id">{{ a.name }} ({{ a.codeIATA }})</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top: 15px;">
+        <div class="col">
+          <label>Cabin Type</label>
+          <select formControlName="CabinTypeId">
+            <option [ngValue]="null">Select Cabin</option>
+            @for (ct of initData()?.cabinTypes; track ct.id) {
+            <option [ngValue]="ct.id">{{ ct.name }}</option>
+            }
+          </select>
+        </div>
+        <div class="col">
+          <label>Departure Date</label>
+          <input type="date" formControlName="TimeDeparture">
+        </div>
+        <div class="col">
+          <label>Seats</label>
+          <input type="number" formControlName="minimumFreeSeats">
+        </div>
+      </div>
+
+      <button type="submit" class="search-btn" [disabled]="isLoading()">
+        {{ isLoading() ? 'Searching...' : 'Search Flights' }}
+      </button>
+    </form>
+  </div>
+
+  <hr>
+
+  <!-- RESULTS TABLE -->
+  <div class="results-section" style="position: relative;">
+
+    <!-- LOADING INDICATOR -->
+    @if (isLoading()) {
+    <div class="loading-overlay">
+      <div class="spinner"></div>
+    </div>
     }
-  </table>
-  }
+
+    @if (flightResults().length > 0) {
+    <table class="flight-table">
+      <thead>
+        <tr>
+          <th>Origin</th>
+          <th>Destination</th>
+          <th>Provider</th>
+          <th>Flight #</th>
+          <!-- SORTABLE COLUMNS -->
+          <th class="sort-header" (click)="setSort('timeDeparture')">
+            Departure {{ sortState().key === 'timeDeparture' ? (sortState().dir === 'asc' ? '↑' : '↓') : '↕' }}
+          </th>
+          <th class="sort-header" (click)="setSort('durationMinutes')">
+            Duration {{ sortState().key === 'durationMinutes' ? (sortState().dir === 'asc' ? '↑' : '↓') : '↕' }}
+          </th>
+          <th class="sort-header" (click)="setSort('priceTotal')">
+            Price {{ sortState().key === 'priceTotal' ? (sortState().dir === 'asc' ? '↑' : '↓') : '↕' }}
+          </th>
+          <th class="sort-header" (click)="setSort('seatsFree')">
+            Availability {{ sortState().key === 'seatsFree' ? (sortState().dir === 'asc' ? '↑' : '↓') : '↕' }}
+          </th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (flight of flightResults(); track flight.id) {
+        <tr>
+          <td>{{ flight.countryOriginName }}, {{ flight.cityOriginName }} <strong>({{ flight.codeIATAOrigin }})</strong></td>
+          <td>{{ flight.countryDestinationName }}, {{ flight.cityDestinationName }} <strong>({{ flight.codeIATADestination }})</strong></td>
+          <td>{{ flight.providerName }}</td>
+          <td>{{ flight.flightNumber }}</td>
+          <td>{{ flight.timeDeparture | date:'MMM d, HH:mm' }}</td>
+          <td>{{ formatDuration(flight.durationMinutes) }}</td>
+          <td>${{ flight.priceTotal }}</td>
+          <td>{{ flight.seatsFree }} left</td>
+          <td><button class="book-btn" (click)="goToBooking(flight)">Book</button></td>
+        </tr>
+        }
+      </tbody>
+    </table>
+    } @else if (!isLoading()) {
+    <div class="empty-state">
+      <p>No flights match your search criteria. Try adjusting the filters.</p>
+    </div>
+    }
+  </div>
 </div>
 
-<!-- BOOKING MODAL -->
+<!-- (Booking Modal and Success Popup remain exactly the same as yours) -->
 @if (selectedFlight(); as flight) {
-<div class="modal-backdrop" style="position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:1000; display:flex; align-items:center; justify-content:center;">
-  <div style="background:white; padding:20px; border-radius:10px; width:400px;">
+<div class="modal-backdrop">
+  <div class="modal-card">
     <h3>Booking: {{ flight.flightNumber }}</h3>
+    <p>Total Price: <strong>${{ bookingTotalPrice() }}</strong></p>
     <form [formGroup]="bookingForm" (ngSubmit)="confirmBooking()">
-      <button type="submit" [disabled]="bookingLoading()">
-        {{ bookingLoading() ? 'Processing...' : 'Confirm' }}
-      </button>
-      <button type="button" (click)="closeBooking()">Cancel</button>
+      <div formArrayName="passengerList">
+        @for (p of passengers.controls; track $index; let i = $index) {
+        <div [formGroupName]="i" class="passenger-form">
+          <h4>Passenger {{ i + 1 }}</h4>
+          <input type="text" formControlName="firstname" placeholder="First Name">
+          <input type="text" formControlName="lastname" placeholder="Last Name">
+          <input type="email" formControlName="email" placeholder="Email">
+          <input type="text" formControlName="documentNumber" placeholder="ID/Passport Number">
+          <button type="button" (click)="removePassenger(i)" *ngIf="passengers.length > 1">Remove</button>
+        </div>
+        }
+      </div>
+      <div class="modal-actions">
+        <button type="button" (click)="addPassenger()">+ Add Passenger</button>
+        <button type="submit" [disabled]="bookingForm.invalid || bookingLoading()">
+          {{ bookingLoading() ? 'Processing...' : 'Confirm Booking' }}
+        </button>
+        <button type="button" (click)="closeBooking()">Cancel</button>
+      </div>
     </form>
   </div>
 </div>
 }
 
-<!-- SUCCESS POPUP (The one that replaces the browser alert) -->
 @if (bookingSuccessData(); as data) {
 <div [class.active]="showSuccessContent()" class="success-overlay">
   <div class="success-card">
@@ -42,6 +183,151 @@
 }
 
 <style>
+  /* ... Existing CSS ... */
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: sans-serif;
+  }
+
+  .row {
+    display: flex;
+    gap: 20px;
+  }
+
+  .col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    margin-top: 10px;
+  }
+
+  select, input {
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+  }
+
+  .search-btn {
+    margin-top: 20px;
+    padding: 12px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+  }
+
+  .flight-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    font-size: 0.9rem;
+  }
+
+    .flight-table th, .flight-table td {
+      border-bottom: 1px solid #eee;
+      padding: 12px;
+      text-align: left;
+    }
+
+    .flight-table th {
+      background: #f8f9fa;
+    }
+
+  /* New CSS for Sortable headers */
+  .sort-header {
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s;
+  }
+
+    .sort-header:hover {
+      background: #e9ecef;
+    }
+
+  /* Loading and Empty State styles */
+  .loading-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.7);
+    display: flex;
+    justify-content: center;
+    padding-top: 50px;
+    z-index: 10;
+  }
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px;
+    color: #888;
+    background: #fcfcfc;
+    border: 1px dashed #ddd;
+    border-radius: 8px;
+    margin-top: 20px;
+  }
+
+  .book-btn {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-card {
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+
+  .passenger-form {
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+  }
+
   .success-overlay {
     position: fixed;
     inset: 0;

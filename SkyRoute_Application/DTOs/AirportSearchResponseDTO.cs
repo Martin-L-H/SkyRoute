@@ -12,6 +12,6 @@
 
     public required string CountryName { get; set; }
 
-    public int CountryID { get; set; }
+    public int CountryId { get; set; }
 
 }
