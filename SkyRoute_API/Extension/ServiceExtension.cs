@@ -17,6 +17,7 @@ public static class ServiceExtensions
         services.AddScoped<ICityService, CityService>();
         services.AddScoped<ICountryRepository, CountryRepository>();
         services.AddScoped<ICountryService, CountryService>();
+        services.AddScoped<ISearchInitializationService, SearchInitializationService>();
 
         return services;
     }

@@ -29,6 +29,7 @@ namespace SkyRoute_API
             app.UseHttpsRedirection();
             app.UseIpRateLimiting();
             app.UseCors("AllowCredentials");
+            app.UseCors("AngularDevPolicy");
             app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();

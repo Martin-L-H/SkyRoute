@@ -7,6 +7,24 @@ public class AirportSearchService : IAirportSearchService
     {
         _repository = repository;
     }
+
+    public async Task<IEnumerable<AirportSearchResponseDTO>> GetAllAirportsWithDetailsAsync()
+    {
+        var airportList = await _repository.GetAirportsWithDetailsAsync("","","");
+
+        IEnumerable<AirportSearchResponseDTO> dtoList = airportList.Select(found => new AirportSearchResponseDTO
+        {
+            Id = found.Id,
+            Name = found.PublicName ?? "Unknown",
+            CodeIATA = found.CodeIATA ?? "---",
+            CityName = found.City?.Name ?? "Unknown City",
+            CountryName = found.City?.Country?.Name ?? "Unknown Country",
+            CountryID = found.City?.CountryId ?? 0,
+            CityId = found.City?.Id ?? 0
+        });
+
+        return dtoList;
+    }
     public async Task<ServiceResponse<IEnumerable<AirportSearchResponseDTO>>> GetAirportsWithDetailsAsync(AirportSearchRequestDTO request)
     {
 
@@ -30,6 +48,7 @@ public class AirportSearchService : IAirportSearchService
 
         return ServiceResponse<IEnumerable<AirportSearchResponseDTO>>.BuildSuccess(dtoList);
     }
+
     public async Task<ServiceResponse<AirportSearchResponseDTO>> GetAirportByIATAWithDetailsAsync(AirportSearchRequestDTO request)
     {
 
