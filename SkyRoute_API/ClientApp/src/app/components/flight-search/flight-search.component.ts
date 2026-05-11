@@ -15,10 +15,8 @@ export class FlightSearchComponent implements OnInit {
   private flightService = inject(FlightService);
 
   initData = this.flightService.initData;
-
   private rawFlights = signal<any[]>([]);
 
-  // Tracking sort column and direction (asc, desc, or none)
   sortState = signal<{ key: string, dir: 'asc' | 'desc' | null }>({ key: '', dir: null });
   isLoading = signal(false);
 
@@ -42,7 +40,6 @@ export class FlightSearchComponent implements OnInit {
     const filters = this.formValues();
     const sort = this.sortState();
 
-    // 1. Filter Logic
     let filtered = list.filter(f => {
       return (!filters?.CountryOriginId || f.countryOriginId === filters.CountryOriginId) &&
         (!filters?.CityOriginId || f.cityOriginId === filters.CityOriginId) &&
@@ -55,22 +52,18 @@ export class FlightSearchComponent implements OnInit {
         (!filters?.TimeDeparture || f.timeDeparture.startsWith(filters.TimeDeparture));
     });
 
-    // 2. Sorting Logic (Updated for Alphabetical Strings)
     if (sort.key && sort.dir) {
       filtered.sort((a, b) => {
         const valA = a[sort.key];
         const valB = b[sort.key];
-
         if (typeof valA === 'string' && typeof valB === 'string') {
           return sort.dir === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
         }
-
         if (valA < valB) return sort.dir === 'asc' ? -1 : 1;
         if (valA > valB) return sort.dir === 'asc' ? 1 : -1;
         return 0;
       });
     }
-
     return filtered;
   });
 
@@ -88,6 +81,9 @@ export class FlightSearchComponent implements OnInit {
     flightId: [null as number | null, Validators.required],
     passengerList: this.fb.array([])
   });
+
+  get passengers() { return this.bookingForm.get('passengerList') as FormArray; }
+  bookingTotalPrice = computed(() => (this.selectedFlight()?.priceTotal || 0) * this.passengers.length);
 
   ngOnInit() {
     this.flightService.getSearchMetadata().subscribe();
@@ -157,8 +153,6 @@ export class FlightSearchComponent implements OnInit {
     return cityId ? airports.filter(a => a.cityId === cityId) : [];
   });
 
-  get passengers() { return this.bookingForm.get('passengerList') as FormArray; }
-
   goToBooking(flight: any) {
     this.selectedFlight.set(flight);
     this.bookingForm.patchValue({ flightId: flight.id });
@@ -176,7 +170,13 @@ export class FlightSearchComponent implements OnInit {
     }));
   }
 
-  removePassenger(index: number) { this.passengers.removeAt(index); }
+  removePassenger(index: number) { if (this.passengers.length > 1) this.passengers.removeAt(index); }
+
+  closeOnBackdrop(event: MouseEvent) {
+    if ((event.target as HTMLElement).classList.contains('modal-backdrop')) {
+      this.closeBooking();
+    }
+  }
 
   confirmBooking() {
     if (this.bookingForm.invalid || this.bookingLoading()) return;
@@ -195,5 +195,4 @@ export class FlightSearchComponent implements OnInit {
   closeBooking() { this.selectedFlight.set(null); this.bookingForm.reset(); }
   closeSuccessPopup() { this.showSuccessContent.set(false); this.bookingSuccessData.set(null); }
   formatDuration(min: number) { return `${Math.floor(min / 60)}h ${min % 60}m`; }
-  bookingTotalPrice = computed(() => (this.selectedFlight()?.priceTotal || 0) * this.passengers.length);
 }

@@ -1,5 +1,5 @@
 <div class="container">
-  <!-- SEARCH FORM SECTION -->
+  <!-- SEARCH FORM SECTION (Your original style) -->
   <div class="search-section">
     <h2>Search Flights</h2>
     <form [formGroup]="searchForm" (ngSubmit)="onSearch()">
@@ -9,22 +9,19 @@
           <select formControlName="CountryOriginId" (change)="searchForm.patchValue({CityOriginId: null, AirportOriginId: null})">
             <option [ngValue]="null">All Countries</option>
             @for (c of countries(); track c.id) {
-            <option [ngValue]="c.id">{{ c.name }}</option>
-            }
+            <option [ngValue]="c.id">{{ c.name }}</option> }
           </select>
           <label>City</label>
           <select formControlName="CityOriginId" [disabled]="!searchForm.get('CountryOriginId')?.value" (change)="searchForm.patchValue({AirportOriginId: null})">
             <option [ngValue]="null">All Cities</option>
             @for (city of filteredOriginCities(); track city.id) {
-            <option [ngValue]="city.id">{{ city.name }}</option>
-            }
+            <option [ngValue]="city.id">{{ city.name }}</option> }
           </select>
           <label>Airport</label>
           <select formControlName="AirportOriginId" [disabled]="!searchForm.get('CityOriginId')?.value">
             <option [ngValue]="null">All Airports</option>
             @for (a of filteredOriginAirports(); track a.id) {
-            <option [ngValue]="a.id">{{ a.name }} ({{ a.codeIATA }})</option>
-            }
+            <option [ngValue]="a.id">{{ a.name }} ({{ a.codeIATA }})</option> }
           </select>
         </div>
         <div class="col">
@@ -32,22 +29,19 @@
           <select formControlName="CountryDestinationId" (change)="searchForm.patchValue({CityDestinationId: null, AirportDestinationId: null})">
             <option [ngValue]="null">All Countries</option>
             @for (c of countries(); track c.id) {
-            <option [ngValue]="c.id">{{ c.name }}</option>
-            }
+            <option [ngValue]="c.id">{{ c.name }}</option> }
           </select>
           <label>City</label>
           <select formControlName="CityDestinationId" [disabled]="!searchForm.get('CountryDestinationId')?.value" (change)="searchForm.patchValue({AirportDestinationId: null})">
             <option [ngValue]="null">All Cities</option>
             @for (city of filteredDestCities(); track city.id) {
-            <option [ngValue]="city.id">{{ city.name }}</option>
-            }
+            <option [ngValue]="city.id">{{ city.name }}</option> }
           </select>
           <label>Airport</label>
           <select formControlName="AirportDestinationId" [disabled]="!searchForm.get('CityDestinationId')?.value">
             <option [ngValue]="null">All Airports</option>
             @for (a of filteredDestAirports(); track a.id) {
-            <option [ngValue]="a.id">{{ a.name }} ({{ a.codeIATA }})</option>
-            }
+            <option [ngValue]="a.id">{{ a.name }} ({{ a.codeIATA }})</option> }
           </select>
         </div>
       </div>
@@ -58,8 +52,7 @@
           <select formControlName="CabinTypeId">
             <option [ngValue]="null">Select Cabin</option>
             @for (ct of initData()?.cabinTypes; track ct.id) {
-            <option [ngValue]="ct.id">{{ ct.name }}</option>
-            }
+            <option [ngValue]="ct.id">{{ ct.name }}</option> }
           </select>
         </div>
         <div class="col">
@@ -81,11 +74,7 @@
   <hr>
 
   <div class="results-section" style="position: relative;">
-    @if (isLoading()) {
-    <div class="loading-overlay">
-      <div class="spinner"></div>
-    </div>
-    }
+    @if (isLoading()) { <div class="loading-overlay"><div class="spinner"></div></div> }
 
     @if (flightResults().length > 0) {
     <table class="flight-table">
@@ -93,7 +82,6 @@
         <tr>
           <th>Origin</th>
           <th>Destination</th>
-          <!-- SORTABLE PROVIDER -->
           <th class="sort-header" (click)="setSort('providerName')">
             Provider {{ sortState().key === 'providerName' ? (sortState().dir === 'asc' ? '↑' : '↓') : '↕' }}
           </th>
@@ -137,54 +125,102 @@
   </div>
 </div>
 
+<!-- ADVANCED BOOKING MODAL -->
 @if (selectedFlight(); as flight) {
-<div class="modal-backdrop">
-  <div class="modal-card">
-    <h3>Booking: {{ flight.flightNumber }}</h3>
-    <p>Total Price: <strong>${{ bookingTotalPrice() }}</strong></p>
-    <form [formGroup]="bookingForm" (ngSubmit)="confirmBooking()">
-      <div formArrayName="passengerList">
-        @for (p of passengers.controls; track $index; let i = $index) {
-        <div [formGroupName]="i" class="passenger-form">
-          <h4>Passenger {{ i + 1 }}</h4>
-          <input type="text" formControlName="firstname" placeholder="First Name">
-          <input type="text" formControlName="lastname" placeholder="Last Name">
-          <input type="email" formControlName="email" placeholder="Email">
-          <input type="text" formControlName="documentNumber" placeholder="ID/Passport Number">
-          <button type="button" (click)="removePassenger(i)" *ngIf="passengers.length > 1">Remove</button>
+<div class="modal-backdrop" (mousedown)="closeOnBackdrop($event)">
+  <div class="booking-master-card">
+    <div class="modal-header">
+      <div class="header-titles">
+        <h2>Confirm Booking</h2>
+        <span class="flight-badge">{{ flight.flightNumber }}</span>
+      </div>
+      <button class="close-x" (click)="closeBooking()">×</button>
+    </div>
+
+    <div class="modal-content-grid">
+      <!-- SIDEBAR: Flight Summary -->
+      <div class="flight-summary-sidebar">
+        <div class="summary-box">
+          <h3>Flight Summary</h3>
+          <div class="summary-row">
+            <label>Route</label>
+            <span>{{ flight.codeIATAOrigin }} → {{ flight.codeIATADestination }}</span>
+          </div>
+          <div class="summary-row">
+            <label>Departure</label>
+            <span>{{ flight.timeDeparture | date:'medium' }}</span>
+          </div>
+          <div class="summary-row">
+            <label>Provider</label>
+            <span>{{ flight.providerName }}</span>
+          </div>
+          <hr>
+          <div class="summary-row total">
+            <label>Total Price</label>
+            <span class="price-val">${{ bookingTotalPrice() }}</span>
+          </div>
+          <p class="passenger-count">For {{ passengers.length }} passenger(s)</p>
         </div>
-        }
       </div>
-      <div class="modal-actions">
-        <button type="button" (click)="addPassenger()">+ Add Passenger</button>
-        <button type="submit" [disabled]="bookingForm.invalid || bookingLoading()">
-          {{ bookingLoading() ? 'Processing...' : 'Confirm Booking' }}
-        </button>
-        <button type="button" (click)="closeBooking()">Cancel</button>
+
+      <!-- MAIN: Passenger Forms -->
+      <div class="passenger-form-area">
+        <form [formGroup]="bookingForm" (ngSubmit)="confirmBooking()">
+          <div formArrayName="passengerList">
+            @for (p of passengers.controls; track $index; let i = $index) {
+            <div [formGroupName]="i" class="passenger-item-card">
+              <div class="passenger-header">
+                <h4>Passenger {{ i + 1 }}</h4>
+                @if (passengers.length > 1) {
+                <button type="button" class="remove-p-btn" (click)="removePassenger(i)">Remove</button>
+                }
+              </div>
+              <div class="passenger-grid">
+                <input type="text" formControlName="firstname" placeholder="First Name">
+                <input type="text" formControlName="lastname" placeholder="Last Name">
+                <input type="email" formControlName="email" placeholder="Email">
+                <input type="text" formControlName="documentNumber" placeholder="ID/Passport Number">
+              </div>
+            </div>
+            }
+          </div>
+
+          <div class="form-footer-actions">
+            <button type="button" class="add-p-btn" (click)="addPassenger()">+ Add Passenger</button>
+            <button type="submit" class="confirm-p-btn" [disabled]="bookingForm.invalid || bookingLoading()">
+              {{ bookingLoading() ? 'Finalizing...' : 'Pay & Confirm Booking' }}
+            </button>
+          </div>
+        </form>
       </div>
-    </form>
+    </div>
   </div>
 </div>
 }
 
+<!-- SUCCESS POPUP -->
 @if (bookingSuccessData(); as data) {
 <div [class.active]="showSuccessContent()" class="success-overlay">
   <div class="success-card">
-    <div class="icon">✅</div>
-    <h2>Booking Confirmed!</h2>
-    <p>Reference: <strong>{{ data.referenceCode }}</strong></p>
-    <p>Destination: {{ data.cityDestiny }}</p>
-    <button class="done-btn" (click)="closeSuccessPopup()">Finish</button>
+    <div class="success-icon">✓</div>
+    <h2>Tickets Issued!</h2>
+    <p>Booking Reference: <strong>{{ data.referenceCode }}</strong></p>
+    <div class="success-details">
+      <p>Destination: <strong>{{ data.cityDestiny }}</strong></p>
+      <p>Your tickets have been sent to your email.</p>
+    </div>
+    <button class="done-btn" (click)="closeSuccessPopup()">Return to Search</button>
   </div>
 </div>
 }
 
 <style>
+  /* --- REUSING YOUR SEARCH STYLES --- */
   .container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
-    font-family: sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   }
 
   .row {
@@ -202,51 +238,71 @@
     font-weight: bold;
     margin-bottom: 5px;
     margin-top: 10px;
+    color: #444;
   }
 
   select, input {
-    padding: 8px;
-    border-radius: 4px;
-    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    font-size: 14px;
   }
 
   .search-btn {
     margin-top: 20px;
-    padding: 12px;
+    padding: 14px;
     background: #007bff;
     color: white;
     border: none;
-    border-radius: 4px;
+    border-radius: 6px;
     cursor: pointer;
     width: 100%;
+    font-weight: bold;
   }
 
   .flight-table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
-    font-size: 0.9rem;
+    font-size: 14px;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
   }
 
     .flight-table th, .flight-table td {
       border-bottom: 1px solid #eee;
-      padding: 12px;
+      padding: 15px;
       text-align: left;
     }
 
     .flight-table th {
       background: #f8f9fa;
+      color: #666;
+      font-size: 12px;
+      text-transform: uppercase;
     }
 
   .sort-header {
     cursor: pointer;
     user-select: none;
-    transition: background 0.2s;
+    transition: 0.2s;
   }
 
     .sort-header:hover {
-      background: #e9ecef;
+      background: #f1f1f1;
     }
+
+  .book-btn {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+  }
 
   .loading-overlay {
     position: absolute;
@@ -277,62 +333,225 @@
     }
   }
 
-  .empty-state {
-    text-align: center;
-    padding: 40px;
-    color: #888;
-    background: #fcfcfc;
-    border: 1px dashed #ddd;
-    border-radius: 8px;
-    margin-top: 20px;
-  }
-
-  .book-btn {
-    background: #28a745;
-    color: white;
-    border: none;
-    padding: 6px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-
+  /* --- THE MASTERPIECE MODAL STYLES --- */
   .modal-backdrop {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.8);
+    background: rgba(0,0,0,0.85);
     z-index: 1000;
     display: flex;
     align-items: center;
     justify-content: center;
+    backdrop-filter: blur(5px);
   }
 
-  .modal-card {
+  .booking-master-card {
     background: white;
-    padding: 25px;
-    border-radius: 10px;
-    width: 500px;
-    max-height: 80vh;
+    width: 1000px;
+    max-width: 95vw;
+    max-height: 90vh;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    animation: modalIn 0.3s ease-out;
+  }
+
+  @keyframes modalIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .modal-header {
+    padding: 20px 30px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #fafafa;
+  }
+
+  .header-titles h2 {
+    margin: 0;
+    font-size: 24px;
+  }
+
+  .flight-badge {
+    background: #007bff;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    margin-top: 5px;
+    display: inline-block;
+  }
+
+  .close-x {
+    background: none;
+    border: none;
+    font-size: 32px;
+    cursor: pointer;
+    color: #aaa;
+    transition: 0.2s;
+  }
+
+    .close-x:hover {
+      color: #333;
+    }
+
+  .modal-content-grid {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .flight-summary-sidebar {
+    background: #f4f7f9;
+    padding: 30px;
+    border-right: 1px solid #eee;
     overflow-y: auto;
   }
 
-  .passenger-form {
-    border: 1px solid #ddd;
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 5px;
+  .summary-box h3 {
+    margin-top: 0;
+    font-size: 18px;
+    margin-bottom: 20px;
+    color: #333;
   }
 
+  .summary-row {
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+  }
+
+    .summary-row label {
+      font-size: 11px;
+      color: #888;
+      text-transform: uppercase;
+      margin: 0;
+    }
+
+    .summary-row span {
+      font-weight: 600;
+      font-size: 15px;
+    }
+
+  .total {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 2px dashed #ccc;
+  }
+
+  .price-val {
+    font-size: 28px;
+    color: #28a745;
+  }
+
+  .passenger-count {
+    font-size: 13px;
+    color: #666;
+    font-style: italic;
+  }
+
+  .passenger-form-area {
+    padding: 30px;
+    overflow-y: auto;
+    background: #fff;
+  }
+
+  .passenger-item-card {
+    border: 1px solid #eee;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    background: #fdfdfd;
+  }
+
+  .passenger-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+
+    .passenger-header h4 {
+      margin: 0;
+      color: #007bff;
+    }
+
+  .remove-p-btn {
+    background: none;
+    border: none;
+    color: #dc3545;
+    cursor: pointer;
+    font-size: 13px;
+    text-decoration: underline;
+  }
+
+  .passenger-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+  }
+
+  .form-footer-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+  }
+
+  .add-p-btn {
+    background: #eee;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.2s;
+  }
+
+    .add-p-btn:hover {
+      background: #ddd;
+    }
+
+  .confirm-p-btn {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3);
+  }
+
+  /* SUCCESS OVERLAY */
   .success-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.9);
+    background: rgba(255,255,255,0.98);
     z-index: 9999;
     display: flex;
     align-items: center;
     justify-content: center;
     opacity: 0;
     visibility: hidden;
-    transition: 0.3s;
+    transition: 0.4s;
   }
 
     .success-overlay.active {
@@ -341,29 +560,28 @@
     }
 
   .success-card {
-    background: white;
-    padding: 30px;
-    border-radius: 20px;
     text-align: center;
-    transform: translateY(20px);
-    transition: 0.4s;
+    max-width: 450px;
+    padding: 40px;
+    transform: translateY(30px);
+    transition: 0.5s;
   }
 
   .success-overlay.active .success-card {
     transform: translateY(0);
   }
 
-  .icon {
-    font-size: 50px;
-  }
-
-  .done-btn {
-    background: #28a745;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-top: 15px;
+  .success-icon {
+    font-size: 60px;
+    color: #28a745;
+    margin-bottom: 20px;
+    border: 4px solid #28a745;
+    width: 100px;
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    margin: 0 auto 20px;
   }
 </style>
