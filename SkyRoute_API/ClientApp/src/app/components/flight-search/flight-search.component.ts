@@ -14,11 +14,19 @@ export class FlightSearchComponent implements OnInit {
   private fb = inject(FormBuilder);
   private flightService = inject(FlightService);
 
+  // Data Sources
   initData = this.flightService.initData;
   private rawFlights = signal<any[]>([]);
+
+  // State
   sortState = signal<{ key: string, dir: 'asc' | 'desc' | null }>({ key: '', dir: null });
   isLoading = signal(false);
+  selectedFlight = signal<any | null>(null);
+  bookingLoading = signal(false);
+  bookingSuccessData = signal<any | null>(null);
+  showSuccessContent = signal(false);
 
+  // Forms
   searchForm = this.fb.group({
     CountryOriginId: [null as number | null],
     CityOriginId: [null as number | null],
@@ -32,8 +40,14 @@ export class FlightSearchComponent implements OnInit {
     minimumFreeSeats: [1]
   });
 
+  bookingForm = this.fb.group({
+    flightId: [null as number | null, Validators.required],
+    passengerList: this.fb.array([])
+  });
+
   formValues = toSignal(this.searchForm.valueChanges, { initialValue: this.searchForm.value });
 
+  // Computed Results & Filtering
   flightResults = computed(() => {
     let list = [...this.rawFlights()];
     const filters = this.formValues();
@@ -46,7 +60,7 @@ export class FlightSearchComponent implements OnInit {
         (!filters?.CountryDestinationId || f.countryDestinationId === filters.CountryDestinationId) &&
         (!filters?.CityDestinationId || f.cityDestinationId === filters.CityDestinationId) &&
         (!filters?.AirportDestinationId || f.airportDestinationId === filters.AirportDestinationId) &&
-        (!filters?.CabinTypeId || f.cabinTypeId === filters.CabinTypeId) &&
+        (!filters?.CabinTypeId || f.cabinType === filters.CabinTypeId) &&
         (!filters?.minimumFreeSeats || f.seatsFree >= filters.minimumFreeSeats) &&
         (!filters?.TimeDeparture || f.timeDeparture.startsWith(filters.TimeDeparture));
     });
@@ -66,55 +80,11 @@ export class FlightSearchComponent implements OnInit {
     return filtered;
   });
 
+  // Location UI Helpers
   originCountryVal = computed(() => this.formValues()?.CountryOriginId);
   originCityVal = computed(() => this.formValues()?.CityOriginId);
   destCountryVal = computed(() => this.formValues()?.CountryDestinationId);
   destCityVal = computed(() => this.formValues()?.CityDestinationId);
-
-  selectedFlight = signal<any | null>(null);
-  bookingLoading = signal(false);
-  bookingSuccessData = signal<any | null>(null);
-  showSuccessContent = signal(false);
-
-  bookingForm = this.fb.group({
-    flightId: [null as number | null, Validators.required],
-    passengerList: this.fb.array([])
-  });
-
-  get passengers() { return this.bookingForm.get('passengerList') as FormArray; }
-
-  // FIX 1: Listen to valueChanges to ensure total price updates on Add/Remove
-  bookingTotalPrice = computed(() => {
-    const flight = this.selectedFlight();
-    const count = this.formValues() ? this.passengers.length : 1;
-    return (flight?.priceTotal || 0) * count;
-  });
-
-  ngOnInit() {
-    this.flightService.getSearchMetadata().subscribe();
-    this.onSearch();
-  }
-
-  onSearch() {
-    this.isLoading.set(true);
-    this.flightService.searchFlights(this.searchForm.value).subscribe({
-      next: (results) => {
-        this.rawFlights.set(results);
-        this.isLoading.set(false);
-      },
-      error: () => this.isLoading.set(false)
-    });
-  }
-
-  setSort(key: string) {
-    const current = this.sortState();
-    if (current.key === key) {
-      if (current.dir === 'asc') this.sortState.set({ key, dir: 'desc' });
-      else if (current.dir === 'desc') this.sortState.set({ key: '', dir: null });
-    } else {
-      this.sortState.set({ key, dir: 'asc' });
-    }
-  }
 
   countries = computed(() => {
     const airports = this.initData()?.airports || [];
@@ -158,6 +128,46 @@ export class FlightSearchComponent implements OnInit {
     return cityId ? airports.filter(a => a.cityId === cityId) : [];
   });
 
+  // Booking Logic
+  get passengers() { return this.bookingForm.get('passengerList') as FormArray; }
+
+  bookingTotalPrice = computed(() => {
+    const flight = this.selectedFlight();
+    const count = this.passengers.length;
+    return (flight?.priceTotal || 0) * count;
+  });
+
+  ngOnInit() {
+    this.flightService.getSearchMetadata().subscribe();
+    this.onSearch();
+  }
+
+  onSearch() {
+    this.isLoading.set(true);
+    this.flightService.searchFlights(this.searchForm.value).subscribe({
+      next: (results) => {
+        this.rawFlights.set(results);
+        this.isLoading.set(false);
+      },
+      error: () => this.isLoading.set(false)
+    });
+  }
+
+  getCabinName(cabinType: number): string {
+    const types = ['Economy', 'Premium', 'Business', 'First'];
+    return types[cabinType] || 'Unknown';
+  }
+
+  setSort(key: string) {
+    const current = this.sortState();
+    if (current.key === key) {
+      if (current.dir === 'asc') this.sortState.set({ key, dir: 'desc' });
+      else if (current.dir === 'desc') this.sortState.set({ key: '', dir: null });
+    } else {
+      this.sortState.set({ key, dir: 'asc' });
+    }
+  }
+
   goToBooking(flight: any) {
     this.selectedFlight.set(flight);
     this.bookingForm.patchValue({ flightId: flight.id });
@@ -173,21 +183,11 @@ export class FlightSearchComponent implements OnInit {
       documentNumber: ['', Validators.required],
       ispassport: [false]
     }));
-    // Force a UI refresh for the computed total
-    this.searchForm.patchValue({});
   }
 
-  // FIX 3: Use removeAt(index) to remove the specific passenger clicked
   removePassenger(index: number) {
     if (this.passengers.length > 1) {
       this.passengers.removeAt(index);
-      this.searchForm.patchValue({}); // Refresh total
-    }
-  }
-
-  closeOnBackdrop(event: MouseEvent) {
-    if ((event.target as HTMLElement).classList.contains('modal-backdrop')) {
-      this.closeBooking();
     }
   }
 
@@ -208,4 +208,7 @@ export class FlightSearchComponent implements OnInit {
   closeBooking() { this.selectedFlight.set(null); this.bookingForm.reset(); }
   closeSuccessPopup() { this.showSuccessContent.set(false); this.bookingSuccessData.set(null); }
   formatDuration(min: number) { return `${Math.floor(min / 60)}h ${min % 60}m`; }
+  closeOnBackdrop(event: MouseEvent) {
+    if ((event.target as HTMLElement).classList.contains('modal-backdrop')) this.closeBooking();
+  }
 }

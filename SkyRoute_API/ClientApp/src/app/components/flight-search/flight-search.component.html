@@ -82,10 +82,12 @@
         <tr>
           <th>Origin</th>
           <th>Destination</th>
-          <!-- Flight # moved to the left of Provider -->
           <th>Flight #</th>
           <th class="sort-header" (click)="setSort('providerName')">
             Provider {{ sortState().key === 'providerName' ? (sortState().dir === 'asc' ? '↑' : '↓') : '↕' }}
+          </th>
+          <th class="sort-header" (click)="setSort('cabinType')">
+            Cabin {{ sortState().key === 'cabinType' ? (sortState().dir === 'asc' ? '↑' : '↓') : '↕' }}
           </th>
           <th class="sort-header" (click)="setSort('timeDeparture')">
             Departure {{ sortState().key === 'timeDeparture' ? (sortState().dir === 'asc' ? '↑' : '↓') : '↕' }}
@@ -117,12 +119,12 @@
               <strong class="iata-sub">{{ flight.codeIATADestination }}</strong>
             </div>
           </td>
-          <!-- Flight # and Provider Swapped -->
           <td><span class="flight-no-chip">{{ flight.flightNumber }}</span></td>
           <td>{{ flight.providerName }}</td>
+          <td><span class="cabin-label">{{ getCabinName(flight.cabinType) }}</span></td>
           <td>{{ flight.timeDeparture | date:'MMM d, HH:mm' }}</td>
           <td>{{ formatDuration(flight.durationMinutes) }}</td>
-          <td>${{ flight.priceTotal }}</td>
+          <td><strong>${{ flight.priceTotal }}</strong></td>
           <td>{{ flight.seatsFree }} left</td>
           <td><button class="book-btn" (click)="goToBooking(flight)">Book</button></td>
         </tr>
@@ -135,56 +137,59 @@
   </div>
 </div>
 
-<!-- ADVANCED BOOKING MODAL -->
-@if (selectedFlight(); as flight) {
-<div class="modal-backdrop" (mousedown)="closeOnBackdrop($event)">
+<!-- BOOKING MODAL -->
+@if (selectedFlight()) {
+<div class="modal-backdrop" (click)="closeOnBackdrop($event)">
   <div class="booking-master-card">
     <div class="modal-header">
-      <div class="header-titles">
-        <h2>Confirm Booking</h2>
-        <span class="flight-badge">{{ flight.flightNumber }}</span>
+      <div>
+        <span class="flight-badge">Flight #{{ selectedFlight()?.flightNumber }}</span>
+        <h2 style="margin: 5px 0 0 0;">Confirm Booking</h2>
       </div>
-      <button class="close-x" (click)="closeBooking()">×</button>
+      <button class="close-x" (click)="closeBooking()">&times;</button>
     </div>
 
     <div class="modal-content-grid">
       <div class="flight-summary-sidebar">
-        <div class="summary-box">
-          <h3>Flight Summary</h3>
-          <div class="summary-row"><label>Route</label><span>{{ flight.codeIATAOrigin }} → {{ flight.codeIATADestination }}</span></div>
-          <div class="summary-row"><label>Departure</label><span>{{ flight.timeDeparture | date:'medium' }}</span></div>
-          <div class="summary-row"><label>Provider</label><span>{{ flight.providerName }}</span></div>
-          <hr>
-          <div class="summary-row total">
-            <label>Total Price</label>
-            <span class="price-val">${{ bookingTotalPrice() }}</span>
-          </div>
-          <p class="passenger-count">For {{ passengers.length }} passenger(s)</p>
+        <div class="summary-row">
+          <label>Route</label>
+          <strong>{{ selectedFlight()?.codeIATAOrigin }} &rarr; {{ selectedFlight()?.codeIATADestination }}</strong>
+        </div>
+        <div class="summary-row">
+          <label>Departure</label>
+          <span>{{ selectedFlight()?.timeDeparture | date:'EEEE, MMM d' }}</span>
+          <span>{{ selectedFlight()?.timeDeparture | date:'HH:mm' }}</span>
+        </div>
+        <div class="summary-row">
+          <label>Total Price</label>
+          <span class="price-val">${{ bookingTotalPrice() }}</span>
         </div>
       </div>
 
       <div class="passenger-form-area">
-        <form [formGroup]="bookingForm" (ngSubmit)="confirmBooking()">
+        <form [formGroup]="bookingForm">
           <div formArrayName="passengerList">
-            @for (p of passengers.controls; track p; let i = $index) {
-            <div [formGroupName]="i" class="passenger-item-card">
+            @for (p of passengers.controls; track $index) {
+            <div class="passenger-item-card" [formGroupName]="$index">
               <div class="passenger-header">
-                <h4>Passenger {{ i + 1 }}</h4>
-                <button type="button" class="remove-p-btn" (click)="removePassenger(i)" *ngIf="passengers.length > 1">Remove</button>
+                <strong>Passenger #{{ $index + 1 }}</strong>
+                @if (passengers.length > 1) {
+                <button type="button" class="remove-p-btn" (click)="removePassenger($index)">Remove</button>
+                }
               </div>
               <div class="passenger-grid">
-                <input type="text" formControlName="firstname" placeholder="First Name">
-                <input type="text" formControlName="lastname" placeholder="Last Name">
-
                 <div class="input-wrap">
-                  <input type="email" formControlName="email" placeholder="Email"
-                         [class.invalid-input]="p.get('email')?.invalid && p.get('email')?.touched">
-                  @if (p.get('email')?.invalid && p.get('email')?.touched) {
-                  <small class="error-text">Please enter a valid email address.</small>
-                  }
+                  <input placeholder="First Name" formControlName="firstname">
                 </div>
-
-                <input type="text" formControlName="documentNumber" placeholder="ID/Passport Number">
+                <div class="input-wrap">
+                  <input placeholder="Last Name" formControlName="lastname">
+                </div>
+                <div class="input-wrap">
+                  <input placeholder="Email" formControlName="email">
+                </div>
+                <div class="input-wrap">
+                  <input placeholder="ID / Document" formControlName="documentNumber">
+                </div>
               </div>
             </div>
             }
@@ -192,8 +197,8 @@
 
           <div class="form-footer-actions">
             <button type="button" class="add-p-btn" (click)="addPassenger()">+ Add Passenger</button>
-            <button type="submit" class="confirm-p-btn" [disabled]="bookingForm.invalid || bookingLoading()">
-              {{ bookingLoading() ? 'Finalizing...' : 'Pay & Confirm Booking' }}
+            <button type="button" class="confirm-p-btn" [disabled]="bookingForm.invalid || bookingLoading()" (click)="confirmBooking()">
+              {{ bookingLoading() ? 'Processing...' : 'Confirm Booking' }}
             </button>
           </div>
         </form>
@@ -204,16 +209,14 @@
 }
 
 <!-- SUCCESS POPUP -->
-@if (bookingSuccessData(); as data) {
-<div [class.active]="showSuccessContent()" class="success-overlay">
+<div class="success-overlay" [class.active]="showSuccessContent()">
   <div class="success-card">
-    <div class="success-icon">✓</div>
-    <h2>Tickets Issued!</h2>
-    <p>Booking Reference: <strong>{{ data.referenceCode }}</strong></p>
-    <button class="done-btn" (click)="closeSuccessPopup()">Return to Search</button>
+    <div class="success-icon">&check;</div>
+    <h2>Booking Successful!</h2>
+    <p>Your reservation has been confirmed.</p>
+    <button class="search-btn" (click)="closeSuccessPopup()">Back to Search</button>
   </div>
 </div>
-}
 
 <style>
   /* Base Styles */
@@ -259,7 +262,6 @@
     font-weight: bold;
   }
 
-  /* Table Adjustments */
   .flight-table {
     width: 100%;
     border-collapse: collapse;
@@ -280,7 +282,6 @@
     user-select: none;
   }
 
-  /* Location Stack for IATA below */
   .location-stack {
     display: flex;
     flex-direction: column;
@@ -293,7 +294,6 @@
     margin-top: 2px;
   }
 
-  /* Flight # Visual */
   .flight-no-chip {
     background: #f1f3f5;
     padding: 4px 8px;
@@ -302,6 +302,14 @@
     font-weight: bold;
     color: #495057;
     border: 1px solid #dee2e6;
+  }
+
+  .cabin-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
   }
 
   .book-btn {
@@ -314,7 +322,7 @@
     font-weight: bold;
   }
 
-  /* Modal Mastery */
+  /* Modal Styles */
   .modal-backdrop {
     position: fixed;
     inset: 0;
@@ -436,23 +444,6 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 12px;
-  }
-
-  .input-wrap {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .invalid-input {
-    border-color: #dc3545 !important;
-    background: #fff8f8;
-  }
-
-  .error-text {
-    color: #dc3545;
-    font-size: 11px;
-    margin-top: 4px;
-    font-weight: 600;
   }
 
   .form-footer-actions {
