@@ -1,6 +1,4 @@
-﻿using SkyRoute_Domain.Entities;
-
-public interface IFlightProvider
+﻿public interface IFlightProvider
 {
     string Provider { get; }
     Task<IEnumerable<FlightSearchResponseDTO>> GetFlightsAsync(FlightSearchRequestDTO requestDTO);

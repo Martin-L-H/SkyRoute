@@ -7,7 +7,7 @@ namespace SkyRoute_API
     public class Program
     {
         public static void Main(string[] args)
-        {
+        { // DONT FORGET! "npx ng serve --port 4200 --open"
             var builder = WebApplication.CreateBuilder(args);
             builder.Services.AddLogging(logging => logging.AddConsole());
             builder.Services.AddControllers();

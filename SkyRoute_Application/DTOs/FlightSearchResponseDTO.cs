@@ -5,7 +5,7 @@ public class FlightSearchResponseDTO
 
     public int Id { get; set; }
 
-    public string FlightNumber { get; set; }
+    public required string FlightNumber { get; set; }
 
     public DateTime TimeDeparture { get; set; }
 
@@ -15,33 +15,33 @@ public class FlightSearchResponseDTO
 
     public CabinType CabinType { get; set; }
 
-    public string ProviderName { get; set; }
+    public required string ProviderName { get; set; }
 
-    public string CodeIATAOrigin { get; set; }
+    public required string CodeIATAOrigin { get; set; }
 
-    public string AirportOriginName { get; set; }
+    public required string AirportOriginName { get; set; }
 
     public int AirportOriginId { get; set; }
 
-    public string CityOriginName { get; set; }
+    public required string CityOriginName { get; set; }
 
     public int CityOriginId { get; set; }
 
-    public string CountryOriginName { get; set; }
+    public required string CountryOriginName { get; set; }
 
     public int CountryOriginId { get; set; }
 
-    public string CodeIATADestination { get; set; }
+    public required string CodeIATADestination { get; set; }
 
-    public string AirportDestinationName { get; set; }
+    public required string AirportDestinationName { get; set; }
 
     public int AirportDestinationId { get; set; }
 
     public int CityDestinationId { get; set; }
 
-    public string CityDestinationName { get; set; }
+    public required string CityDestinationName { get; set; }
 
-    public string CountryDestinationName { get; set; }
+    public required string CountryDestinationName { get; set; }
 
     public int CountryDestinationId { get; set; }
 

@@ -14,8 +14,12 @@
     {
 
         var rawFlights = await _flightRepo.SearchSpecificFlightsAsync(
-            requestDTO.AirportOriginId, 
+            requestDTO.AirportOriginId,
+            requestDTO.CityOriginId,
+            requestDTO.CountryOriginId,
             requestDTO.AirportDestinationId, 
+            requestDTO.CityDestinationId,
+            requestDTO.CountryDestinationId,
             requestDTO.CabinType, 
             requestDTO.TimeDeparture, 
             requestDTO.DurationMinutes,

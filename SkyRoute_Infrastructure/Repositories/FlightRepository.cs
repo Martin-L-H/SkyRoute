@@ -32,8 +32,12 @@ public class FlightRepository : IFlightRepository
     }
 
     public async Task<IEnumerable<Flight>> SearchSpecificFlightsAsync(
-        int? originId, 
-        int? destId, 
+        int? originAirportId,
+        int? originCityId,
+        int? originCountryId, 
+        int? destinyAirportId,
+        int? destinyCityId,
+        int? destinyCountryId,
         CabinType? cabinType, 
         DateTime? departureDate, 
         int? duration, 
@@ -52,16 +56,48 @@ public class FlightRepository : IFlightRepository
             .ThenInclude(a => a.City)
             .ThenInclude(c => c.Country);
 
-        //Technically not required, but for modularity sake, the search can be universal if all parameters are null
-        if (originId != null)
+        if (originCountryId != null)
         {
-            query = query.Where(f => f.AirportOriginId == originId);
+
+            query = query.Where(p => p.AirportOrigin.City.Country.Id == originCountryId);
+
         }
 
-        if (destId != null)
+        if (originCityId != null)
         {
-            query = query.Where(f => f.AirportDestinationId == destId);
+
+            query = query.Where(p => p.AirportOrigin.CityId == originCityId);
+
         }
+
+        if (originAirportId != null)
+        {
+
+            query = query.Where(p => p.Id == originAirportId);
+
+        }
+
+        if (destinyCountryId != null)
+        {
+
+            query = query.Where(p => p.AirportDestination.City.Country.Id == destinyCountryId);
+
+        }
+
+        if (destinyCityId != null)
+        {
+
+            query = query.Where(p => p.AirportDestination.CityId == destinyCityId);
+
+        }
+
+        if (destinyAirportId != null)
+        {
+
+            query = query.Where(p => p.Id == destinyAirportId);
+
+        }
+
 
         if (minimumFreeSeats != null)
         {

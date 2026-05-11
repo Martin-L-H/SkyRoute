@@ -1,0 +1,89 @@
+<!-- RESULTS TABLE -->
+<div class="results-section">
+  @if (flightResults().length > 0) {
+  <table class="flight-table">
+    @for (flight of flightResults(); track flight.id) {
+    <tr>
+      <td>{{ flight.providerName }}</td>
+      <td>{{ flight.seatsFree }} seats left</td>
+      <td><button (click)="goToBooking(flight)">Book</button></td>
+    </tr>
+    }
+  </table>
+  }
+</div>
+
+<!-- BOOKING MODAL -->
+@if (selectedFlight(); as flight) {
+<div class="modal-backdrop" style="position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:1000; display:flex; align-items:center; justify-content:center;">
+  <div style="background:white; padding:20px; border-radius:10px; width:400px;">
+    <h3>Booking: {{ flight.flightNumber }}</h3>
+    <form [formGroup]="bookingForm" (ngSubmit)="confirmBooking()">
+      <button type="submit" [disabled]="bookingLoading()">
+        {{ bookingLoading() ? 'Processing...' : 'Confirm' }}
+      </button>
+      <button type="button" (click)="closeBooking()">Cancel</button>
+    </form>
+  </div>
+</div>
+}
+
+<!-- SUCCESS POPUP (The one that replaces the browser alert) -->
+@if (bookingSuccessData(); as data) {
+<div [class.active]="showSuccessContent()" class="success-overlay">
+  <div class="success-card">
+    <div class="icon">✅</div>
+    <h2>Booking Confirmed!</h2>
+    <p>Reference: <strong>{{ data.referenceCode }}</strong></p>
+    <p>Destination: {{ data.cityDestiny }}</p>
+    <button class="done-btn" (click)="closeSuccessPopup()">Finish</button>
+  </div>
+</div>
+}
+
+<style>
+  .success-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.9);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: 0.3s;
+  }
+
+    .success-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+  .success-card {
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    text-align: center;
+    transform: translateY(20px);
+    transition: 0.4s;
+  }
+
+  .success-overlay.active .success-card {
+    transform: translateY(0);
+  }
+
+  .icon {
+    font-size: 50px;
+  }
+
+  .done-btn {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 15px;
+  }
+</style>
