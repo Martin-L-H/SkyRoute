@@ -16,7 +16,6 @@ export class FlightSearchComponent implements OnInit {
 
   initData = this.flightService.initData;
   private rawFlights = signal<any[]>([]);
-
   sortState = signal<{ key: string, dir: 'asc' | 'desc' | null }>({ key: '', dir: null });
   isLoading = signal(false);
 
@@ -83,7 +82,13 @@ export class FlightSearchComponent implements OnInit {
   });
 
   get passengers() { return this.bookingForm.get('passengerList') as FormArray; }
-  bookingTotalPrice = computed(() => (this.selectedFlight()?.priceTotal || 0) * this.passengers.length);
+
+  // FIX 1: Listen to valueChanges to ensure total price updates on Add/Remove
+  bookingTotalPrice = computed(() => {
+    const flight = this.selectedFlight();
+    const count = this.formValues() ? this.passengers.length : 1;
+    return (flight?.priceTotal || 0) * count;
+  });
 
   ngOnInit() {
     this.flightService.getSearchMetadata().subscribe();
@@ -168,9 +173,17 @@ export class FlightSearchComponent implements OnInit {
       documentNumber: ['', Validators.required],
       ispassport: [false]
     }));
+    // Force a UI refresh for the computed total
+    this.searchForm.patchValue({});
   }
 
-  removePassenger(index: number) { if (this.passengers.length > 1) this.passengers.removeAt(index); }
+  // FIX 3: Use removeAt(index) to remove the specific passenger clicked
+  removePassenger(index: number) {
+    if (this.passengers.length > 1) {
+      this.passengers.removeAt(index);
+      this.searchForm.patchValue({}); // Refresh total
+    }
+  }
 
   closeOnBackdrop(event: MouseEvent) {
     if ((event.target as HTMLElement).classList.contains('modal-backdrop')) {
