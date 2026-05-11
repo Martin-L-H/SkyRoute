@@ -3,7 +3,6 @@
   <div class="search-section">
     <h2>Search Flights</h2>
     <form [formGroup]="searchForm" (ngSubmit)="onSearch()">
-      <!-- Origin/Dest rows remain exactly as you provided -->
       <div class="row">
         <div class="col">
           <label>Origin Country</label>
@@ -81,10 +80,7 @@
 
   <hr>
 
-  <!-- RESULTS TABLE -->
   <div class="results-section" style="position: relative;">
-
-    <!-- LOADING INDICATOR -->
     @if (isLoading()) {
     <div class="loading-overlay">
       <div class="spinner"></div>
@@ -97,9 +93,11 @@
         <tr>
           <th>Origin</th>
           <th>Destination</th>
-          <th>Provider</th>
+          <!-- SORTABLE PROVIDER -->
+          <th class="sort-header" (click)="setSort('providerName')">
+            Provider {{ sortState().key === 'providerName' ? (sortState().dir === 'asc' ? '↑' : '↓') : '↕' }}
+          </th>
           <th>Flight #</th>
-          <!-- SORTABLE COLUMNS -->
           <th class="sort-header" (click)="setSort('timeDeparture')">
             Departure {{ sortState().key === 'timeDeparture' ? (sortState().dir === 'asc' ? '↑' : '↓') : '↕' }}
           </th>
@@ -139,7 +137,6 @@
   </div>
 </div>
 
-<!-- (Booking Modal and Success Popup remain exactly the same as yours) -->
 @if (selectedFlight(); as flight) {
 <div class="modal-backdrop">
   <div class="modal-card">
@@ -183,7 +180,6 @@
 }
 
 <style>
-  /* ... Existing CSS ... */
   .container {
     max-width: 1200px;
     margin: 0 auto;
@@ -242,7 +238,6 @@
       background: #f8f9fa;
     }
 
-  /* New CSS for Sortable headers */
   .sort-header {
     cursor: pointer;
     user-select: none;
@@ -253,7 +248,6 @@
       background: #e9ecef;
     }
 
-  /* Loading and Empty State styles */
   .loading-overlay {
     position: absolute;
     inset: 0;

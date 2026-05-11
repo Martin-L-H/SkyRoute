@@ -18,9 +18,9 @@ export class FlightSearchComponent implements OnInit {
 
   private rawFlights = signal<any[]>([]);
 
-  // NEW: Tracking sort column and direction (asc, desc, or none)
+  // Tracking sort column and direction (asc, desc, or none)
   sortState = signal<{ key: string, dir: 'asc' | 'desc' | null }>({ key: '', dir: null });
-  isLoading = signal(false); // For the loading indicator requirement
+  isLoading = signal(false);
 
   searchForm = this.fb.group({
     CountryOriginId: [null as number | null],
@@ -38,11 +38,11 @@ export class FlightSearchComponent implements OnInit {
   formValues = toSignal(this.searchForm.valueChanges, { initialValue: this.searchForm.value });
 
   flightResults = computed(() => {
-    let list = [...this.rawFlights()]; // Copy to avoid mutation
+    let list = [...this.rawFlights()];
     const filters = this.formValues();
     const sort = this.sortState();
 
-    // 1. Existing Filter Logic
+    // 1. Filter Logic
     let filtered = list.filter(f => {
       return (!filters?.CountryOriginId || f.countryOriginId === filters.CountryOriginId) &&
         (!filters?.CityOriginId || f.cityOriginId === filters.CityOriginId) &&
@@ -55,11 +55,15 @@ export class FlightSearchComponent implements OnInit {
         (!filters?.TimeDeparture || f.timeDeparture.startsWith(filters.TimeDeparture));
     });
 
-    // 2. NEW: Sorting Logic
+    // 2. Sorting Logic (Updated for Alphabetical Strings)
     if (sort.key && sort.dir) {
       filtered.sort((a, b) => {
         const valA = a[sort.key];
         const valB = b[sort.key];
+
+        if (typeof valA === 'string' && typeof valB === 'string') {
+          return sort.dir === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+        }
 
         if (valA < valB) return sort.dir === 'asc' ? -1 : 1;
         if (valA > valB) return sort.dir === 'asc' ? 1 : -1;
@@ -70,7 +74,6 @@ export class FlightSearchComponent implements OnInit {
     return filtered;
   });
 
-  // Helper signals for dropdowns
   originCountryVal = computed(() => this.formValues()?.CountryOriginId);
   originCityVal = computed(() => this.formValues()?.CityOriginId);
   destCountryVal = computed(() => this.formValues()?.CountryDestinationId);
@@ -102,7 +105,6 @@ export class FlightSearchComponent implements OnInit {
     });
   }
 
-  // NEW: Toggle sorting cycle: ASC -> DESC -> NONE
   setSort(key: string) {
     const current = this.sortState();
     if (current.key === key) {
@@ -113,7 +115,6 @@ export class FlightSearchComponent implements OnInit {
     }
   }
 
-  // --- Dropdown Logic ---
   countries = computed(() => {
     const airports = this.initData()?.airports || [];
     return airports.reduce((acc: any[], curr) => {
