@@ -208,8 +208,6 @@
                   <span class="error-text">Required field</span>
                   }
                 </div>
-
-                <!-- NEW: ispassport Toggle -->
                 <div class="input-wrap checkbox-wrap">
                   <label class="check-container">
                     <input type="checkbox" formControlName="ispassport">
@@ -240,8 +238,62 @@
   <div class="success-card">
     <div class="success-icon">&check;</div>
     <h2>Booking Successful!</h2>
-    <p>Your reservation has been confirmed.</p>
-    <button class="search-btn" (click)="closeSuccessPopup()">Back to Search</button>
+    <p style="margin-bottom: 25px;">Your reservation has been confirmed.</p>
+
+    <!-- NEW: ORGANIZED BOOKING DETAILS BOX -->
+    @if (bookingSuccessData()) {
+    <div class="booking-details-box">
+      <div class="ref-section">
+        <label>Booking Reference</label>
+        <div class="ref-code">{{ bookingSuccessData().referenceCode }}</div>
+      </div>
+
+      <div class="details-grid">
+        <div class="detail-item">
+          <label>Flight Number</label>
+          <span>{{ bookingSuccessData().flightNumber }}</span>
+        </div>
+        <div class="detail-item">
+          <label>Provider</label>
+          <span>{{ bookingSuccessData().provider }}</span>
+        </div>
+        <div class="detail-item wide">
+          <label>Route</label>
+          <span>{{ bookingSuccessData().cityOrigin }} ({{ bookingSuccessData().countryOrigin }}) to {{ bookingSuccessData().cityDestiny }} ({{ bookingSuccessData().countryDestiny }})</span>
+        </div>
+        <div class="detail-item">
+          <label>Airport Codes</label>
+          <span>{{ bookingSuccessData().airportOriginCode }} &rarr; {{ bookingSuccessData().airportDestinyCode }}</span>
+        </div>
+        <div class="detail-item">
+          <label>Airports</label>
+          <span class="small-text">"{{ bookingSuccessData().airportOriginName }}" &rarr; "{{ bookingSuccessData().airportDestinyName }}"</span>
+        </div>
+        <div class="detail-item">
+          <label>Departure Time</label>
+          <span>{{ bookingSuccessData().flightDepartureTime | date:'MMM d, yyyy HH:mm' }}</span>
+        </div>
+        <div class="detail-item">
+          <label>Passengers</label>
+          <span>{{ bookingSuccessData().passengerCount }}</span>
+        </div>
+        <div class="detail-item">
+          <label>Cabin Type</label>
+          <span>{{ getCabinName(bookingSuccessData().cabinType) }}</span>
+        </div>
+        <div class="detail-item">
+          <label>Duration</label>
+          <span>{{ formatDuration(bookingSuccessData().durationMinutes) }}</span>
+        </div>
+        <div class="detail-item wide price-detail">
+          <label>Total Price Paid</label>
+          <span class="success-price">${{ bookingSuccessData().priceTotal }}</span>
+        </div>
+      </div>
+    </div>
+    }
+
+    <button class="search-btn" (click)="closeSuccessPopup()" style="max-width: 300px; margin: 0 auto;">Back to Search</button>
   </div>
 </div>
 
@@ -256,7 +308,7 @@
 </div>
 
 <style>
-  /* Base Styles */
+  /* [Previous styles kept as-is, adding specific Success Details styles] */
   .container {
     max-width: 1200px;
     margin: 0 auto;
@@ -549,7 +601,6 @@
       cursor: not-allowed;
     }
 
-  /* Toggle (Checkbox) Specific Styles */
   .checkbox-wrap {
     grid-column: span 2;
     flex-direction: row !important;
@@ -578,7 +629,6 @@
       margin: 0;
     }
 
-  /* OVERLAY STYLES */
   .success-overlay, .error-overlay {
     position: fixed;
     inset: 0;
@@ -609,7 +659,7 @@
     text-align: center;
     padding: 40px;
     border-radius: 20px;
-    max-width: 450px;
+    max-width: 600px;
     width: 90%;
     transform: translateY(20px);
     transition: transform 0.4s ease;
@@ -668,4 +718,83 @@
     .dismiss-btn:hover {
       background: #000;
     }
+
+  /* NEW SUCCESS DETAILS STYLES */
+  .booking-details-box {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 30px;
+    text-align: left;
+  }
+
+  .ref-section {
+    text-align: center;
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+  }
+
+    .ref-section label {
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 1px;
+      color: #6c757d;
+      display: block;
+      margin: 0;
+    }
+
+  .ref-code {
+    font-size: 32px;
+    font-weight: 800;
+    color: #007bff;
+    font-family: 'Courier New', monospace;
+    margin-top: 5px;
+  }
+
+  .details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+  }
+
+  .detail-item {
+    display: flex;
+    flex-direction: column;
+  }
+
+    .detail-item.wide {
+      grid-column: span 2;
+    }
+
+    .detail-item label {
+      font-size: 11px;
+      color: #888;
+      text-transform: uppercase;
+      margin: 0;
+    }
+
+    .detail-item span {
+      font-size: 15px;
+      font-weight: 600;
+      color: #333;
+    }
+
+  .small-text {
+    font-size: 12px !important;
+    color: #666 !important;
+    font-weight: normal !important;
+  }
+
+  .price-detail {
+    border-top: 1px dashed #dee2e6;
+    padding-top: 10px;
+    margin-top: 5px;
+  }
+
+  .success-price {
+    font-size: 22px !important;
+    color: #28a745 !important;
+  }
 </style>

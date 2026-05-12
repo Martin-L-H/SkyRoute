@@ -23,7 +23,7 @@ export class FlightSearchComponent implements OnInit {
   isLoading = signal(false);
   selectedFlight = signal<any | null>(null);
   bookingLoading = signal(false);
-  bookingSuccessData = signal<any | null>(null);
+  bookingSuccessData = signal<any | null>(null); // This will hold the "data" object from response
   showSuccessContent = signal(false);
   errorMessage = signal<string | null>(null);
 
@@ -193,7 +193,7 @@ export class FlightSearchComponent implements OnInit {
       lastname: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       documentNumber: ['', Validators.required],
-      ispassport: [false] // Matches DTO key
+      ispassport: [false]
     }));
     this.updatePassengerCount();
     this.bookingForm.updateValueAndValidity();
@@ -215,6 +215,7 @@ export class FlightSearchComponent implements OnInit {
     this.flightService.bookFlight(this.bookingForm.value).subscribe({
       next: (res) => {
         this.onSearch();
+        // Handle both "res.data" and "res" scenarios
         this.bookingSuccessData.set(res.data || res);
         this.closeBooking();
         setTimeout(() => this.showSuccessContent.set(true), 50);
