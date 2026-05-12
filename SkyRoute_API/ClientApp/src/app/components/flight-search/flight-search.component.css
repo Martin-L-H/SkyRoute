@@ -26,7 +26,17 @@ select, input {
   padding: 10px;
   border-radius: 6px;
   border: 1px solid #ddd;
+  background-color: white;
+  transition: background-color 0.2s, border-color 0.2s;
 }
+  /* VISUAL GREY OUT FOR DISABLED ELEMENTS */
+
+  select:disabled, input:disabled {
+    background-color: #f0f2f5 !important;
+    color: #8e9aaf !important;
+    cursor: not-allowed;
+    border-color: #e2e8f0;
+  }
 
 .invalid-input {
   border-color: #dc3545 !important;
@@ -60,6 +70,12 @@ select, input {
 
   .search-btn:hover:not(:disabled) {
     background: #0056b3;
+  }
+
+  .search-btn:disabled {
+    background: #cccccc;
+    color: #888888;
+    cursor: not-allowed;
   }
 
 .flight-table {
@@ -425,7 +441,6 @@ select, input {
   .dismiss-btn:hover {
     background: #000;
   }
-/* NEW SUCCESS DETAILS STYLES */
 
 .booking-details-box {
   background: #f8f9fa;
@@ -504,22 +519,21 @@ select, input {
   font-size: 22px !important;
   color: #28a745 !important;
 }
-/* Add these to your new flight-search.component.css */
 
 .row-mt {
   margin-top: 15px;
 }
 
 .results-section {
-  position: relative; /* Moved from inline */
+  position: relative;
 }
 
 .modal-title {
-  margin: 5px 0 0 0; /* Moved from inline */
+  margin: 5px 0 0 0;
 }
 
 .success-subtitle {
-  margin-bottom: 25px; /* Moved from inline */
+  margin-bottom: 25px;
 }
 
 .btn-narrow {

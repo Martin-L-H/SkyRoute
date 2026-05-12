@@ -73,7 +73,7 @@ public class FlightRepository : IFlightRepository
         if (originAirportId != null)
         {
 
-            query = query.Where(p => p.Id == originAirportId);
+            query = query.Where(p => p.AirportOriginId == originAirportId);
 
         }
 

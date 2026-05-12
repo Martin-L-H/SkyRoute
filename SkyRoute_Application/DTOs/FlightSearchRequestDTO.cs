@@ -4,7 +4,7 @@ using SkyRoute_Domain.Entities;
 public class FlightSearchRequestDTO
 {
 
-    public CabinType? CabinType { get; set; }
+    public CabinType? CabinTypeId { get; set; }
 
     public DateTime? TimeDeparture { get; set; }
 

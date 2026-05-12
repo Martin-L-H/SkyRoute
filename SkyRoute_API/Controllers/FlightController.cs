@@ -10,7 +10,7 @@ public class FlightController : ControllerBase
     {
         _flightService = flightService;
     }
-    //Cabin Type isn't being parsed to the DTO, not a big problem yet but a minor bug
+
     [HttpGet] //Example: https://localhost:7259/api/flight/?Provider=All or https://localhost:7259/api/flight/?Provider=BudgetWings&cabintype=Economy&airportoriginid=1
     public async Task<IActionResult> Search([FromQuery] FlightSearchRequestDTO request)
     {

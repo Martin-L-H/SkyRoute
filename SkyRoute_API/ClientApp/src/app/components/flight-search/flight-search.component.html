@@ -4,49 +4,65 @@
     <h2>Search Flights</h2>
     <form [formGroup]="searchForm" (ngSubmit)="onSearch()">
       <div class="row">
+        <!-- ORIGIN COLUMN -->
         <div class="col">
           <label>Origin Country</label>
           <select formControlName="CountryOriginId" (change)="searchForm.patchValue({CityOriginId: null, AirportOriginId: null})">
-            <option [ngValue]="null">All Countries</option>
+            <option [ngValue]="null">Select Country</option>
             @for (c of countries(); track c.id) {
             <option [ngValue]="c.id">{{ c.name }}</option> }
           </select>
+
           <label>City</label>
-          <select formControlName="CityOriginId" [disabled]="!searchForm.get('CountryOriginId')?.value" (change)="searchForm.patchValue({AirportOriginId: null})">
-            <option [ngValue]="null">All Cities</option>
+          <!-- Enabled only if Country is selected -->
+          <select formControlName="CityOriginId"
+                  [disabled]="!searchForm.get('CountryOriginId')?.value"
+                  (change)="searchForm.patchValue({AirportOriginId: null})">
+            <option [ngValue]="null">Select City</option>
             @for (city of filteredOriginCities(); track city.id) {
             <option [ngValue]="city.id">{{ city.name }}</option> }
           </select>
+
           <label>Airport</label>
-          <select formControlName="AirportOriginId" [disabled]="!searchForm.get('CityOriginId')?.value">
-            <option [ngValue]="null">All Airports</option>
+          <!-- Enabled only if City is selected -->
+          <select formControlName="AirportOriginId"
+                  [disabled]="!searchForm.get('CityOriginId')?.value">
+            <option [ngValue]="null">Select Airport</option>
             @for (a of filteredOriginAirports(); track a.id) {
             <option [ngValue]="a.id">{{ a.name }} ({{ a.codeIATA }})</option> }
           </select>
         </div>
+
+        <!-- DESTINATION COLUMN -->
         <div class="col">
           <label>Destination Country</label>
           <select formControlName="CountryDestinationId" (change)="searchForm.patchValue({CityDestinationId: null, AirportDestinationId: null})">
-            <option [ngValue]="null">All Countries</option>
+            <option [ngValue]="null">Select Country</option>
             @for (c of countries(); track c.id) {
             <option [ngValue]="c.id">{{ c.name }}</option> }
           </select>
+
           <label>City</label>
-          <select formControlName="CityDestinationId" [disabled]="!searchForm.get('CountryDestinationId')?.value" (change)="searchForm.patchValue({AirportDestinationId: null})">
-            <option [ngValue]="null">All Cities</option>
+          <!-- Enabled only if Country is selected -->
+          <select formControlName="CityDestinationId"
+                  [disabled]="!searchForm.get('CountryDestinationId')?.value"
+                  (change)="searchForm.patchValue({AirportDestinationId: null})">
+            <option [ngValue]="null">Select City</option>
             @for (city of filteredDestCities(); track city.id) {
             <option [ngValue]="city.id">{{ city.name }}</option> }
           </select>
+
           <label>Airport</label>
-          <select formControlName="AirportDestinationId" [disabled]="!searchForm.get('CityDestinationId')?.value">
-            <option [ngValue]="null">All Airports</option>
+          <!-- Enabled only if City is selected -->
+          <select formControlName="AirportDestinationId"
+                  [disabled]="!searchForm.get('CityDestinationId')?.value">
+            <option [ngValue]="null">Select Airport</option>
             @for (a of filteredDestAirports(); track a.id) {
             <option [ngValue]="a.id">{{ a.name }} ({{ a.codeIATA }})</option> }
           </select>
         </div>
       </div>
 
-      <!-- Removed inline style, added 'row-mt' class -->
       <div class="row row-mt">
         <div class="col">
           <label>Cabin Type</label>
@@ -66,7 +82,8 @@
         </div>
       </div>
 
-      <button type="submit" class="search-btn" [disabled]="isLoading()">
+      <button type="submit" class="search-btn"
+              [disabled]="isLoading() || !searchForm.get('AirportOriginId')?.value || !searchForm.get('AirportDestinationId')?.value">
         {{ isLoading() ? 'Searching...' : 'Search Flights' }}
       </button>
     </form>
@@ -74,7 +91,6 @@
 
   <hr>
 
-  <!-- Removed inline relative position, handled by 'results-section' class -->
   <div class="results-section">
     @if (isLoading()) { <div class="loading-overlay"><div class="spinner"></div></div> }
 
@@ -160,7 +176,6 @@
     <div class="modal-header">
       <div>
         <span class="flight-badge">Flight #{{ selectedFlight()?.flightNumber }}</span>
-        <!-- Removed inline margin -->
         <h2 class="modal-title">Confirm Booking</h2>
       </div>
       <button class="close-x" (click)="closeBooking()">&times;</button>
@@ -255,7 +270,6 @@
   <div class="success-card">
     <div class="success-icon">&check;</div>
     <h2>Booking Successful!</h2>
-    <!-- Removed inline margin, added success-subtitle class -->
     <p class="success-subtitle">Your reservation has been confirmed.</p>
 
     @if (bookingSuccessData()) {
@@ -310,7 +324,6 @@
     </div>
     }
 
-    <!-- Removed inline styles, added centered-btn class -->
     <button class="search-btn centered-btn" (click)="closeSuccessPopup()">Back to Search</button>
   </div>
 </div>

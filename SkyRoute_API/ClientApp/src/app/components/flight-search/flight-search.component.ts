@@ -53,27 +53,13 @@ export class FlightSearchComponent implements OnInit {
   formValues = toSignal(this.searchForm.valueChanges, { initialValue: this.searchForm.value });
   bookingFormSignal = toSignal(this.bookingForm.valueChanges, { initialValue: this.bookingForm.value });
 
+  // Only sorts the list fetched from the backend.
   flightResults = computed(() => {
     let list = [...this.rawFlights()];
-    const filters = this.formValues();
     const sort = this.sortState();
 
-    let filtered = list.filter(f => {
-      const cabinFilterActive = filters?.CabinTypeId !== null && filters?.CabinTypeId !== undefined;
-
-      return (!filters?.CountryOriginId || f.countryOriginId === filters.CountryOriginId) &&
-        (!filters?.CityOriginId || f.cityOriginId === filters.CityOriginId) &&
-        (!filters?.AirportOriginId || f.airportOriginId === filters.AirportOriginId) &&
-        (!filters?.CountryDestinationId || f.countryDestinationId === filters.CountryDestinationId) &&
-        (!filters?.CityDestinationId || f.cityDestinationId === filters.CityDestinationId) &&
-        (!filters?.AirportDestinationId || f.airportDestinationId === filters.AirportDestinationId) &&
-        (!cabinFilterActive || f.cabinType === filters?.CabinTypeId) &&
-        (!filters?.minimumFreeSeats || f.seatsFree >= filters.minimumFreeSeats) &&
-        (!filters?.TimeDeparture || f.timeDeparture.startsWith(filters.TimeDeparture));
-    });
-
     if (sort.key && sort.dir) {
-      filtered.sort((a, b) => {
+      list.sort((a, b) => {
         const valA = a[sort.key];
         const valB = b[sort.key];
         if (typeof valA === 'string' && typeof valB === 'string') {
@@ -84,7 +70,7 @@ export class FlightSearchComponent implements OnInit {
         return 0;
       });
     }
-    return filtered;
+    return list;
   });
 
   originCountryVal = computed(() => this.formValues()?.CountryOriginId);
@@ -145,7 +131,6 @@ export class FlightSearchComponent implements OnInit {
 
   ngOnInit() {
     this.flightService.getSearchMetadata().subscribe();
-    this.onSearch();
   }
 
   onSearch() {
@@ -155,7 +140,6 @@ export class FlightSearchComponent implements OnInit {
     const cleanRequest = Object.fromEntries(
       Object.entries(rawValue).filter(([_, v]) => v !== null && v !== '')
     );
-
     this.flightService.searchFlights(cleanRequest).subscribe({
       next: (results) => {
         this.rawFlights.set(results);
@@ -163,17 +147,10 @@ export class FlightSearchComponent implements OnInit {
       },
       error: (err) => {
         this.isLoading.set(false);
-
         let msg = "An error occurred while searching for flights.";
-
-        if (typeof err.error === 'string') {
-          msg = err.error;
-        } else if (err.error?.errors) {
-          msg = Object.values(err.error.errors).flat().join(' ');
-        } else if (err.error?.message) {
-          msg = err.error.message;
-        }
-
+        if (typeof err.error === 'string') msg = err.error;
+        else if (err.error?.errors) msg = Object.values(err.error.errors).flat().join(' ');
+        else if (err.error?.message) msg = err.error.message;
         this.errorMessage.set(msg);
       }
     });
@@ -254,10 +231,7 @@ export class FlightSearchComponent implements OnInit {
   closeErrorPopup() {
     const overlay = document.querySelector('.error-overlay');
     if (overlay) overlay.classList.remove('active');
-
-    setTimeout(() => {
-      this.errorMessage.set(null);
-    }, 400);
+    setTimeout(() => this.errorMessage.set(null), 400);
   }
 
   closeBooking() {
@@ -266,16 +240,12 @@ export class FlightSearchComponent implements OnInit {
   }
 
   closeSuccessPopup() {
-    // Start the fade out animation
     this.showSuccessContent.set(false);
-
-    // Wait for the animation to finish before clearing the data
-    setTimeout(() => {
-      this.bookingSuccessData.set(null);
-    }, 400);
+    setTimeout(() => this.bookingSuccessData.set(null), 400);
   }
 
   formatDuration(min: number) { return `${Math.floor(min / 60)}h ${min % 60}m`; }
+
   closeOnBackdrop(event: MouseEvent) {
     if ((event.target as HTMLElement).classList.contains('modal-backdrop')) this.closeBooking();
   }

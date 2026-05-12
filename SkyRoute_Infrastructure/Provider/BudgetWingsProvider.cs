@@ -22,7 +22,7 @@ public class BudgetWingsProvider : IFlightProvider
             requestDTO.AirportDestinationId,
             requestDTO.CityDestinationId,
             requestDTO.CountryDestinationId,
-            requestDTO.CabinType,
+            requestDTO.CabinTypeId,
             requestDTO.TimeDeparture,
             requestDTO.DurationMinutes,
             requestDTO.minimumFreeSeats);
