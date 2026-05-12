@@ -7,6 +7,7 @@ public static class ServiceExtensions
         
         services.AddScoped<IFlightProvider, GlobalAirProvider>();
         services.AddScoped<IFlightProvider, BudgetWingsProvider>();
+        services.AddScoped<IFlightProvider, SkyConnectProvider>();
         services.AddScoped<IFlightSearchService, FlightSearchService>();
         services.AddScoped<IFlightRepository, FlightRepository>();
         services.AddScoped<IBookingRepository, BookingRepository>();

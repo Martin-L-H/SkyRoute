@@ -1,13 +1,11 @@
-﻿using SkyRoute_Domain.Entities;
-
-public class BudgetWingsProvider : IFlightProvider
+﻿public class SkyConnectProvider : IFlightProvider
 {
     private readonly IFlightRepository _flightRepo;
-    private const string PROVIDER_NAME = "BudgetWings";
+    private const string PROVIDER_NAME = "SkyConnect";
     private const string UNKNOWN_NAME = "Unknown";
     public string Provider => PROVIDER_NAME;
 
-    public BudgetWingsProvider(IFlightRepository flightRepo)
+    public SkyConnectProvider(IFlightRepository flightRepo)
     {
         _flightRepo = flightRepo;
     }
@@ -27,7 +25,7 @@ public class BudgetWingsProvider : IFlightProvider
             requestDTO.DurationMinutes,
             requestDTO.minimumFreeSeats);
 
-        var preFilteredDTO = rawFlights
+        return rawFlights
             .Where(f => f.ProviderName == PROVIDER_NAME)
             .Select(f => new FlightSearchResponseDTO
             (
@@ -58,13 +56,11 @@ public class BudgetWingsProvider : IFlightProvider
                 seatsFree: f.SeatsFree,
                 durationMinutes: f.DurationMinutes
             ));
-        return preFilteredDTO;
-
     }
 
     public decimal GetPricingPerPerson(decimal baseFare)
     {
-        //10% discount, 29.99 as minimum
-        return Math.Max(Math.Round(baseFare * 0.90m, 2), 29.99m);
+        //15% overcharge over base price
+        return Math.Round(baseFare * 1.15m, 2);
     }
 }

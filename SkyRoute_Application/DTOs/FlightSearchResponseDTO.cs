@@ -1,3 +1,29 @@
 ﻿using SkyRoute_Domain.Entities;
 
-public record class FlightSearchResponseDTO(int id, string flightNumber, DateTime timeDeparture, DateTime timeArrival, decimal baseFare, CabinType cabinType, string providerName, string codeIATAOrigin, string airportOriginName, int airportOriginId, string cityOriginName, int cityOriginId, string countryOriginName, int countryOriginId, string codeIATADestination, string airportDestinationName, int airportDestinationId, int cityDestinationId, string cityDestinationName, string countryDestinationName, int countryDestinationId, decimal pricePerPerson, decimal priceTotal, int seatsTotal, int seatsFree, int durationMinutes);
+public record class FlightSearchResponseDTO(
+    int id, 
+    string flightNumber, 
+    DateTime timeDeparture, 
+    DateTime timeArrival, 
+    decimal baseFare, 
+    CabinType cabinType, 
+    string providerName, 
+    string codeIATAOrigin, 
+    string airportOriginName, 
+    int airportOriginId, 
+    string cityOriginName, 
+    int cityOriginId, 
+    string countryOriginName, 
+    int countryOriginId, 
+    string codeIATADestination, 
+    string airportDestinationName, 
+    int airportDestinationId, 
+    int cityDestinationId, 
+    string cityDestinationName, 
+    string countryDestinationName, 
+    int countryDestinationId, 
+    decimal pricePerPerson, 
+    decimal priceTotal, 
+    int seatsTotal, 
+    int seatsFree, 
+    int durationMinutes);

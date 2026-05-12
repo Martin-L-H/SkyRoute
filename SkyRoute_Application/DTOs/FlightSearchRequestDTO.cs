@@ -21,6 +21,8 @@ public class FlightSearchRequestDTO
     public int? CountryDestinationId { get; set; }
     public string? CountryDestinationName { get; set; }
 
+    public decimal? maximumPricePerPerson { get; set; }
+
 
     [Required]
     [Range(1, 9, ErrorMessage = "You can only search for a number between 1 and 9")]

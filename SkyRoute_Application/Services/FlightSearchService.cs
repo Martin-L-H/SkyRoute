@@ -13,6 +13,7 @@ public class FlightSearchService : IFlightSearchService
     public async Task<ServiceResponse<IEnumerable<FlightSearchResponseDTO>>> SearchAsync(FlightSearchRequestDTO request)
     {
 
+
         if (request.AirportOriginId == request.AirportDestinationId && (request.AirportOriginId != null && request.AirportDestinationId != null))
         {
 
@@ -41,12 +42,9 @@ public class FlightSearchService : IFlightSearchService
         var searchTasks = providersToRun.Select(p => p.GetFlightsAsync(request));
 
         var resultsFromAllProviders = await Task.WhenAll(searchTasks);
-        /*
-        var flightListDTO = resultsFromAllProviders
-            .SelectMany(result => result)
-            .OrderBy(f => f.timeDeparture)
-            .ToList();
-        */
+
+        
+
         var flightListDTO = resultsFromAllProviders
             .SelectMany(result => result.Select(f => new FlightSearchResponseDTO(
                 f.id,
@@ -79,7 +77,9 @@ public class FlightSearchService : IFlightSearchService
             .OrderBy(f => f.timeDeparture)
             .ToList();
 
-        return ServiceResponse<IEnumerable<FlightSearchResponseDTO>>.BuildSuccess(flightListDTO);
+        IEnumerable<FlightSearchResponseDTO> filteredList = flightListDTO.Where(p => p.pricePerPerson <= request.maximumPricePerPerson);
+
+        return ServiceResponse<IEnumerable<FlightSearchResponseDTO>>.BuildSuccess(filteredList);
     }
 
     public IEnumerable<string> GetAvailableProviders()

@@ -1,6 +1,4 @@
-﻿using SkyRoute_Domain.Entities;
-
-public class GlobalAirProvider : IFlightProvider
+﻿public class GlobalAirProvider : IFlightProvider
 {
     private readonly IFlightRepository _flightRepo;
     private const string PROVIDER_NAME = "GlobalAir";
@@ -27,7 +25,7 @@ public class GlobalAirProvider : IFlightProvider
             requestDTO.DurationMinutes,
             requestDTO.minimumFreeSeats);
 
-        return rawFlights
+        var preFilteredDTO = rawFlights
             .Where(f => f.ProviderName == PROVIDER_NAME)
             .Select(f => new FlightSearchResponseDTO
             (
@@ -58,6 +56,8 @@ public class GlobalAirProvider : IFlightProvider
                 seatsFree: f.SeatsFree,
                 durationMinutes : f.DurationMinutes
             ));
+
+        return preFilteredDTO.Where(p => p.pricePerPerson < requestDTO.maximumPricePerPerson);
     }
 
     public decimal GetPricingPerPerson(decimal baseFare)

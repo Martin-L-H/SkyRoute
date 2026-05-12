@@ -27,7 +27,7 @@ public class BookingRepository : IBookingRepository
         try
 
         {
-            Flight? flight = await context.Flights.Where(p => p.Id == booking.FlightId).FirstAsync();
+            Flight? flight = await context.Flights.Where(p => p.Id == booking.FlightId).SingleOrDefaultAsync();
 
             if (flight == null || flight.SeatsFree < booking.PassengerCount)
 
