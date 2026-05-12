@@ -18,3 +18,5 @@ I originally intended to have a docker/Kubernetes compatible service running, ho
 
 This code also has no "job queuing" for Booking inserts, just race flag conditions. This makes the code insecure and has the possibility of accidental overbooking
 if two people make the same request at the same time.
+
+Doing a search with X amount of minimum seat availability returns the individual seat's price per person multiplied by X due to an oversight of mine
