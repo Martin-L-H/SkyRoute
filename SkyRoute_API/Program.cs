@@ -28,7 +28,7 @@ namespace SkyRoute_API
             lifetime.ApplicationStopping.Register(async () => {await Task.CompletedTask;});
             app.UseHttpsRedirection();
             app.UseIpRateLimiting();
-            app.UseCors("AllowCredentials");
+            //app.UseCors("AllowCredentials");
             app.UseCors("AngularDevPolicy");
             app.UseAuthentication();
             app.UseAuthorization();

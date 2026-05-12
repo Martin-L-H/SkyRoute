@@ -1,3 +1,5 @@
+/* --- PREVIOUS STYLES (PRESERVED EXACTLY) --- */
+
 .container {
   max-width: 1200px;
   margin: 0 auto;
@@ -540,3 +542,102 @@ select, input {
   max-width: 300px;
   margin: 0 auto;
 }
+
+/* --- NEW EXTERNAL FEATURES (HERO, MAIN CONTENT, FOOTER) --- */
+
+.hero {
+  background: linear-gradient(rgba(0, 53, 128, 0.7), rgba(0, 53, 128, 0.7)), url('https://images.unsplash.com/photo-1436491865332-7a61a109c05d?auto=format&fit=crop&w=1200&q=80');
+  background-size: cover;
+  background-position: center;
+  color: white;
+  padding: 80px 20px;
+  text-align: center;
+  margin-bottom: -60px; /* Slight overlap for the card */
+}
+
+.hero-content h1 {
+  font-size: 3rem;
+  margin-bottom: 10px;
+  letter-spacing: -1px;
+}
+
+.hero-content p {
+  font-size: 1.2rem;
+  opacity: 0.9;
+}
+
+.main-content {
+  background-color: #f0f2f5;
+  padding-bottom: 60px;
+  min-height: 80vh;
+}
+
+.card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+  padding: 40px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 30px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #eee;
+}
+
+  .section-header .icon {
+    font-size: 24px;
+  }
+
+  .section-header h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #003580;
+  }
+
+.footer {
+  background-color: #003580;
+  color: white;
+  padding: 40px 0;
+  margin-top: auto;
+}
+
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+}
+
+.brand-name {
+  font-size: 1.5rem;
+  font-weight: 800;
+  display: block;
+}
+
+.footer-brand p {
+  font-size: 0.9rem;
+  opacity: 0.7;
+}
+
+.footer-links {
+  display: flex;
+  gap: 20px;
+}
+
+  .footer-links a {
+    color: white;
+    text-decoration: none;
+    font-size: 0.9rem;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+  }
+
+    .footer-links a:hover {
+      opacity: 1;
+    }
