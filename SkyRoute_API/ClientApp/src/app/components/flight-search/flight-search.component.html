@@ -1,339 +1,381 @@
-<div class="container">
-  <!-- SEARCH FORM SECTION -->
-  <div class="search-section">
-    <h2>Search Flights</h2>
-    <form [formGroup]="searchForm" (ngSubmit)="onSearch()">
-      <div class="row">
-        <!-- ORIGIN COLUMN -->
-        <div class="col">
-          <label>Origin Country</label>
-          <select formControlName="CountryOriginId" (change)="searchForm.patchValue({CityOriginId: null, AirportOriginId: null})">
-            <option [ngValue]="null">Select Country</option>
-            @for (c of countries(); track c.id) {
-            <option [ngValue]="c.id">{{ c.name }}</option> }
-          </select>
-
-          <label>City</label>
-          <!-- Enabled only if Country is selected -->
-          <select formControlName="CityOriginId"
-                  [disabled]="!searchForm.get('CountryOriginId')?.value"
-                  (change)="searchForm.patchValue({AirportOriginId: null})">
-            <option [ngValue]="null">Select City</option>
-            @for (city of filteredOriginCities(); track city.id) {
-            <option [ngValue]="city.id">{{ city.name }}</option> }
-          </select>
-
-          <label>Airport</label>
-          <!-- Enabled only if City is selected -->
-          <select formControlName="AirportOriginId"
-                  [disabled]="!searchForm.get('CityOriginId')?.value">
-            <option [ngValue]="null">Select Airport</option>
-            @for (a of filteredOriginAirports(); track a.id) {
-            <option [ngValue]="a.id">{{ a.name }} ({{ a.codeIATA }})</option> }
-          </select>
-        </div>
-
-        <!-- DESTINATION COLUMN -->
-        <div class="col">
-          <label>Destination Country</label>
-          <select formControlName="CountryDestinationId" (change)="searchForm.patchValue({CityDestinationId: null, AirportDestinationId: null})">
-            <option [ngValue]="null">Select Country</option>
-            @for (c of countries(); track c.id) {
-            <option [ngValue]="c.id">{{ c.name }}</option> }
-          </select>
-
-          <label>City</label>
-          <!-- Enabled only if Country is selected -->
-          <select formControlName="CityDestinationId"
-                  [disabled]="!searchForm.get('CountryDestinationId')?.value"
-                  (change)="searchForm.patchValue({AirportDestinationId: null})">
-            <option [ngValue]="null">Select City</option>
-            @for (city of filteredDestCities(); track city.id) {
-            <option [ngValue]="city.id">{{ city.name }}</option> }
-          </select>
-
-          <label>Airport</label>
-          <!-- Enabled only if City is selected -->
-          <select formControlName="AirportDestinationId"
-                  [disabled]="!searchForm.get('CityDestinationId')?.value">
-            <option [ngValue]="null">Select Airport</option>
-            @for (a of filteredDestAirports(); track a.id) {
-            <option [ngValue]="a.id">{{ a.name }} ({{ a.codeIATA }})</option> }
-          </select>
+<div class="page-wrapper">
+  <!-- NAVIGATION BAR -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="brand">
+        <span class="logo-icon">✈</span>
+        <div class="brand-text">
+          <span class="brand-name">SkyRoute</span>
+          <span class="brand-motto">Your Journey, Simplified.</span>
         </div>
       </div>
-
-      <div class="row row-mt">
-        <div class="col">
-          <label>Cabin Type</label>
-          <select formControlName="CabinTypeId">
-            <option [ngValue]="null">Select Cabin</option>
-            @for (ct of initData()?.cabinTypes; track ct.id) {
-            <option [ngValue]="ct.id">{{ ct.name }}</option> }
-          </select>
-        </div>
-        <div class="col">
-          <label>Departure Date</label>
-          <input type="date" formControlName="TimeDeparture">
-        </div>
-        <div class="col">
-          <label>Seats</label>
-          <input type="number" formControlName="minimumFreeSeats">
-        </div>
+      <div class="nav-links">
+        <a href="#" class="active">Search</a>
+        <a href="#">My Bookings</a>
+        <a href="#">Support</a>
       </div>
-
-      <button type="submit" class="search-btn"
-              [disabled]="isLoading() || !searchForm.get('AirportOriginId')?.value || !searchForm.get('AirportDestinationId')?.value">
-        {{ isLoading() ? 'Searching...' : 'Search Flights' }}
-      </button>
-    </form>
-  </div>
-
-  <hr>
-
-  <div class="results-section">
-    @if (isLoading()) { <div class="loading-overlay"><div class="spinner"></div></div> }
-
-    @if (flightResults().length > 0) {
-    <table class="flight-table">
-      <thead>
-        <tr>
-          <th>Origin</th>
-          <th>Destination</th>
-          <th>Flight #</th>
-          <th class="sort-header" (click)="setSort('providerName')">
-            Provider {{ sortState().key === 'providerName' ? (sortState().dir === 'asc' ? '↑' : '↓') : '↕' }}
-          </th>
-          <th class="sort-header" (click)="setSort('cabinType')">
-            Cabin {{ sortState().key === 'cabinType' ? (sortState().dir === 'asc' ? '↑' : '↓') : '↕' }}
-          </th>
-          <th class="sort-header" (click)="setSort('timeDeparture')">
-            Departure {{ sortState().key === 'timeDeparture' ? (sortState().dir === 'asc' ? '↑' : '↓') : '↕' }}
-          </th>
-          <th class="sort-header" (click)="setSort('timeArrival')">
-            Arrival {{ sortState().key === 'timeArrival' ? (sortState().dir === 'asc' ? '↑' : '↓') : '↕' }}
-          </th>
-          <th class="sort-header" (click)="setSort('durationMinutes')">
-            Duration {{ sortState().key === 'durationMinutes' ? (sortState().dir === 'asc' ? '↑' : '↓') : '↕' }}
-          </th>
-          <th class="sort-header" (click)="setSort('priceTotal')">
-            Price {{ sortState().key === 'priceTotal' ? (sortState().dir === 'asc' ? '↑' : '↓') : '↕' }}
-          </th>
-          <th class="sort-header" (click)="setSort('seatsFree')">
-            Availability {{ sortState().key === 'seatsFree' ? (sortState().dir === 'asc' ? '↑' : '↓') : '↕' }}
-          </th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (flight of flightResults(); track flight.id) {
-        <tr>
-          <td>
-            <div class="location-stack">
-              <span>{{ flight.countryOriginName }}, {{ flight.cityOriginName }}</span>
-              <strong class="iata-sub">{{ flight.codeIATAOrigin }}</strong>
-            </div>
-          </td>
-          <td>
-            <div class="location-stack">
-              <span>{{ flight.countryDestinationName }}, {{ flight.cityDestinationName }}</span>
-              <strong class="iata-sub">{{ flight.codeIATADestination }}</strong>
-            </div>
-          </td>
-          <td><span class="flight-no-chip">{{ flight.flightNumber }}</span></td>
-          <td>{{ flight.providerName }}</td>
-          <td><span class="cabin-label">{{ getCabinName(flight.cabinType) }}</span></td>
-          <td>
-            <div class="time-stack">
-              <strong>{{ flight.timeDeparture | date:'HH:mm' }}</strong>
-              <small>{{ flight.timeDeparture | date:'MMM d' }}</small>
-            </div>
-          </td>
-          <td>
-            <div class="time-stack">
-              <strong>{{ flight.timeArrival | date:'HH:mm' }}</strong>
-              <small>{{ flight.timeArrival | date:'MMM d' }}</small>
-            </div>
-          </td>
-          <td>{{ formatDuration(flight.durationMinutes) }}</td>
-          <td><strong>${{ flight.priceTotal }}</strong></td>
-          <td>{{ flight.seatsFree }} left</td>
-          <td><button class="book-btn" (click)="goToBooking(flight)">Book</button></td>
-        </tr>
-        }
-      </tbody>
-    </table>
-    } @else if (!isLoading()) {
-    <div class="empty-state"><p>No flights found.</p></div>
-    }
-  </div>
-</div>
-
-<!-- BOOKING MODAL -->
-@if (selectedFlight()) {
-<div class="modal-backdrop" (click)="closeOnBackdrop($event)">
-  <div class="booking-master-card">
-    <div class="modal-header">
-      <div>
-        <span class="flight-badge">Flight #{{ selectedFlight()?.flightNumber }}</span>
-        <h2 class="modal-title">Confirm Booking</h2>
-      </div>
-      <button class="close-x" (click)="closeBooking()">&times;</button>
     </div>
+  </nav>
 
-    <div class="modal-content-grid">
-      <div class="flight-summary-sidebar">
-        <div class="summary-row">
-          <label>Provider</label>
-          <strong>{{ selectedFlight()?.providerName }}</strong>
-        </div>
+  <!-- HERO HEADER -->
+  <header class="hero">
+    <div class="hero-content">
+      <h1>Explore the World</h1>
+      <p>Compare and book flights to over 5,000 destinations worldwide.</p>
+    </div>
+  </header>
 
-        <div class="summary-row">
-          <label>Route</label>
-          <strong>{{ selectedFlight()?.codeIATAOrigin }} &rarr; {{ selectedFlight()?.codeIATADestination }}</strong>
-        </div>
+  <div class="container">
+    <!-- SEARCH FORM SECTION -->
+    <div class="search-section">
+      <h2>Search Flights</h2>
+      <form [formGroup]="searchForm" (ngSubmit)="onSearch()">
+        <div class="row">
+          <!-- ORIGIN COLUMN -->
+          <div class="col">
+            <label>Origin Country</label>
+            <select formControlName="CountryOriginId" (change)="searchForm.patchValue({CityOriginId: null, AirportOriginId: null})">
+              <option [ngValue]="null">Select Country</option>
+              @for (c of countries(); track c.id) {
+              <option [ngValue]="c.id">{{ c.name }}</option> }
+            </select>
 
-        <div class="summary-row">
-          <label>Departure</label>
-          <span>{{ selectedFlight()?.timeDeparture | date:'EEEE, MMM d' }}</span>
-          <span>{{ selectedFlight()?.timeDeparture | date:'HH:mm' }}</span>
-        </div>
+            <label>City</label>
+            <!-- Enabled only if Country is selected -->
+            <select formControlName="CityOriginId"
+                    [disabled]="!searchForm.get('CountryOriginId')?.value"
+                    (change)="searchForm.patchValue({AirportOriginId: null})">
+              <option [ngValue]="null">Select City</option>
+              @for (city of filteredOriginCities(); track city.id) {
+              <option [ngValue]="city.id">{{ city.name }}</option> }
+            </select>
 
-        <div class="summary-row">
-          <label>Cabin Class</label>
-          <strong>{{ getCabinName(selectedFlight()?.cabinType) }}</strong>
-        </div>
-
-        <div class="summary-row">
-          <label>Total Price</label>
-          <span class="price-val">${{ bookingTotalPrice() }}</span>
-        </div>
-      </div>
-
-      <div class="passenger-form-area">
-        <form [formGroup]="bookingForm">
-          <div formArrayName="passengerList">
-            @for (p of passengers.controls; track p) {
-            <div class="passenger-item-card" [formGroupName]="$index">
-              <div class="passenger-header">
-                <strong>Passenger #{{ $index + 1 }}</strong>
-                @if (passengers.length > 1) {
-                <button type="button" class="remove-p-btn" (click)="removePassenger($index)">Remove</button>
-                }
-              </div>
-              <div class="passenger-grid">
-                <div class="input-wrap">
-                  <input placeholder="First Name" formControlName="firstname" [class.invalid-input]="p.get('firstname')?.invalid && p.get('firstname')?.touched">
-                </div>
-                <div class="input-wrap">
-                  <input placeholder="Last Name" formControlName="lastname" [class.invalid-input]="p.get('lastname')?.invalid && p.get('lastname')?.touched">
-                </div>
-                <div class="input-wrap">
-                  <input placeholder="Email" formControlName="email" [class.invalid-input]="p.get('email')?.invalid && p.get('email')?.touched">
-                  @if (p.get('email')?.invalid && p.get('email')?.touched) {
-                  <span class="error-text">Please enter a valid email</span>
-                  }
-                </div>
-                <div class="input-wrap">
-                  <input placeholder="ID / Document" formControlName="documentNumber" [class.invalid-input]="p.get('documentNumber')?.invalid && p.get('documentNumber')?.touched">
-                  @if (p.get('documentNumber')?.invalid && p.get('documentNumber')?.touched) {
-                  <span class="error-text">Required field</span>
-                  }
-                </div>
-                <div class="input-wrap checkbox-wrap">
-                  <label class="check-container">
-                    <input type="checkbox" formControlName="ispassport">
-                    <span class="checkmark"></span>
-                    Document is a Passport
-                  </label>
-                </div>
-              </div>
-            </div>
-            }
+            <label>Airport</label>
+            <!-- Enabled only if City is selected -->
+            <select formControlName="AirportOriginId"
+                    [disabled]="!searchForm.get('CityOriginId')?.value">
+              <option [ngValue]="null">Select Airport</option>
+              @for (a of filteredOriginAirports(); track a.id) {
+              <option [ngValue]="a.id">{{ a.name }} ({{ a.codeIATA }})</option> }
+            </select>
           </div>
 
-          <div class="form-footer-actions">
-            <button type="button" class="add-p-btn" (click)="addPassenger()">+ Add Passenger</button>
-            <button type="button" class="confirm-p-btn" [disabled]="bookingForm.invalid || bookingLoading()" (click)="confirmBooking()">
-              {{ bookingLoading() ? 'Processing...' : 'Confirm Booking' }}
-            </button>
+          <!-- DESTINATION COLUMN -->
+          <div class="col">
+            <label>Destination Country</label>
+            <select formControlName="CountryDestinationId" (change)="searchForm.patchValue({CityDestinationId: null, AirportDestinationId: null})">
+              <option [ngValue]="null">Select Country</option>
+              @for (c of countries(); track c.id) {
+              <option [ngValue]="c.id">{{ c.name }}</option> }
+            </select>
+
+            <label>City</label>
+            <!-- Enabled only if Country is selected -->
+            <select formControlName="CityDestinationId"
+                    [disabled]="!searchForm.get('CountryDestinationId')?.value"
+                    (change)="searchForm.patchValue({AirportDestinationId: null})">
+              <option [ngValue]="null">Select City</option>
+              @for (city of filteredDestCities(); track city.id) {
+              <option [ngValue]="city.id">{{ city.name }}</option> }
+            </select>
+
+            <label>Airport</label>
+            <!-- Enabled only if City is selected -->
+            <select formControlName="AirportDestinationId"
+                    [disabled]="!searchForm.get('CityDestinationId')?.value">
+              <option [ngValue]="null">Select Airport</option>
+              @for (a of filteredDestAirports(); track a.id) {
+              <option [ngValue]="a.id">{{ a.name }} ({{ a.codeIATA }})</option> }
+            </select>
           </div>
-        </form>
+        </div>
+
+        <div class="row row-mt">
+          <div class="col">
+            <label>Cabin Type</label>
+            <select formControlName="CabinTypeId">
+              <option [ngValue]="null">Select Cabin</option>
+              @for (ct of initData()?.cabinTypes; track ct.id) {
+              <option [ngValue]="ct.id">{{ ct.name }}</option> }
+            </select>
+          </div>
+          <div class="col">
+            <label>Departure Date</label>
+            <input type="date" formControlName="TimeDeparture">
+          </div>
+          <div class="col">
+            <label>Seats</label>
+            <input type="number" formControlName="minimumFreeSeats">
+          </div>
+        </div>
+
+        <button type="submit" class="search-btn"
+                [disabled]="isLoading() || !searchForm.get('AirportOriginId')?.value || !searchForm.get('AirportDestinationId')?.value">
+          {{ isLoading() ? 'Searching...' : 'Search Flights' }}
+        </button>
+      </form>
+    </div>
+
+    <hr>
+
+    <div class="results-section">
+      @if (isLoading()) { <div class="loading-overlay"><div class="spinner"></div></div> }
+
+      @if (flightResults().length > 0) {
+      <table class="flight-table">
+        <thead>
+          <tr>
+            <th>Origin</th>
+            <th>Destination</th>
+            <th>Flight #</th>
+            <th class="sort-header" (click)="setSort('providerName')">
+              Provider {{ sortState().key === 'providerName' ? (sortState().dir === 'asc' ? '↑' : '↓') : '↕' }}
+            </th>
+            <th class="sort-header" (click)="setSort('cabinType')">
+              Cabin {{ sortState().key === 'cabinType' ? (sortState().dir === 'asc' ? '↑' : '↓') : '↕' }}
+            </th>
+            <th class="sort-header" (click)="setSort('timeDeparture')">
+              Departure {{ sortState().key === 'timeDeparture' ? (sortState().dir === 'asc' ? '↑' : '↓') : '↕' }}
+            </th>
+            <th class="sort-header" (click)="setSort('timeArrival')">
+              Arrival {{ sortState().key === 'timeArrival' ? (sortState().dir === 'asc' ? '↑' : '↓') : '↕' }}
+            </th>
+            <th class="sort-header" (click)="setSort('durationMinutes')">
+              Duration {{ sortState().key === 'durationMinutes' ? (sortState().dir === 'asc' ? '↑' : '↓') : '↕' }}
+            </th>
+            <th class="sort-header" (click)="setSort('priceTotal')">
+              Price {{ sortState().key === 'priceTotal' ? (sortState().dir === 'asc' ? '↑' : '↓') : '↕' }}
+            </th>
+            <th class="sort-header" (click)="setSort('seatsFree')">
+              Availability {{ sortState().key === 'seatsFree' ? (sortState().dir === 'asc' ? '↑' : '↓') : '↕' }}
+            </th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (flight of flightResults(); track flight.id) {
+          <tr>
+            <td>
+              <div class="location-stack">
+                <span>{{ flight.countryOriginName }}, {{ flight.cityOriginName }}</span>
+                <strong class="iata-sub">{{ flight.codeIATAOrigin }}</strong>
+              </div>
+            </td>
+            <td>
+              <div class="location-stack">
+                <span>{{ flight.countryDestinationName }}, {{ flight.cityDestinationName }}</span>
+                <strong class="iata-sub">{{ flight.codeIATADestination }}</strong>
+              </div>
+            </td>
+            <td><span class="flight-no-chip">{{ flight.flightNumber }}</span></td>
+            <td>{{ flight.providerName }}</td>
+            <td><span class="cabin-label">{{ getCabinName(flight.cabinType) }}</span></td>
+            <td>
+              <div class="time-stack">
+                <strong>{{ flight.timeDeparture | date:'HH:mm' }}</strong>
+                <small>{{ flight.timeDeparture | date:'MMM d' }}</small>
+              </div>
+            </td>
+            <td>
+              <div class="time-stack">
+                <strong>{{ flight.timeArrival | date:'HH:mm' }}</strong>
+                <small>{{ flight.timeArrival | date:'MMM d' }}</small>
+              </div>
+            </td>
+            <td>{{ formatDuration(flight.durationMinutes) }}</td>
+            <td><strong>${{ flight.priceTotal }}</strong></td>
+            <td>{{ flight.seatsFree }} left</td>
+            <td><button class="book-btn" (click)="goToBooking(flight)">Book</button></td>
+          </tr>
+          }
+        </tbody>
+      </table>
+      } @else if (!isLoading()) {
+      <div class="empty-state"><p>No flights found.</p></div>
+      }
+    </div>
+  </div>
+
+  <!-- BOOKING MODAL -->
+  @if (selectedFlight()) {
+  <div class="modal-backdrop" (click)="closeOnBackdrop($event)">
+    <div class="booking-master-card">
+      <div class="modal-header">
+        <div>
+          <span class="flight-badge">Flight #{{ selectedFlight()?.flightNumber }}</span>
+          <h2 class="modal-title">Confirm Booking</h2>
+        </div>
+        <button class="close-x" (click)="closeBooking()">&times;</button>
+      </div>
+
+      <div class="modal-content-grid">
+        <div class="flight-summary-sidebar">
+          <div class="summary-row">
+            <label>Provider</label>
+            <strong>{{ selectedFlight()?.providerName }}</strong>
+          </div>
+
+          <div class="summary-row">
+            <label>Route</label>
+            <strong>{{ selectedFlight()?.codeIATAOrigin }} &rarr; {{ selectedFlight()?.codeIATADestination }}</strong>
+          </div>
+
+          <div class="summary-row">
+            <label>Departure</label>
+            <span>{{ selectedFlight()?.timeDeparture | date:'EEEE, MMM d' }}</span>
+            <span>{{ selectedFlight()?.timeDeparture | date:'HH:mm' }}</span>
+          </div>
+
+          <div class="summary-row">
+            <label>Cabin Class</label>
+            <strong>{{ getCabinName(selectedFlight()?.cabinType) }}</strong>
+          </div>
+
+          <div class="summary-row">
+            <label>Total Price</label>
+            <span class="price-val">${{ bookingTotalPrice() }}</span>
+          </div>
+        </div>
+
+        <div class="passenger-form-area">
+          <form [formGroup]="bookingForm">
+            <div formArrayName="passengerList">
+              @for (p of passengers.controls; track p) {
+              <div class="passenger-item-card" [formGroupName]="$index">
+                <div class="passenger-header">
+                  <strong>Passenger #{{ $index + 1 }}</strong>
+                  @if (passengers.length > 1) {
+                  <button type="button" class="remove-p-btn" (click)="removePassenger($index)">Remove</button>
+                  }
+                </div>
+                <div class="passenger-grid">
+                  <div class="input-wrap">
+                    <input placeholder="First Name" formControlName="firstname" [class.invalid-input]="p.get('firstname')?.invalid && p.get('firstname')?.touched">
+                  </div>
+                  <div class="input-wrap">
+                    <input placeholder="Last Name" formControlName="lastname" [class.invalid-input]="p.get('lastname')?.invalid && p.get('lastname')?.touched">
+                  </div>
+                  <div class="input-wrap">
+                    <input placeholder="Email" formControlName="email" [class.invalid-input]="p.get('email')?.invalid && p.get('email')?.touched">
+                    @if (p.get('email')?.invalid && p.get('email')?.touched) {
+                    <span class="error-text">Please enter a valid email</span>
+                    }
+                  </div>
+                  <div class="input-wrap">
+                    <input placeholder="ID / Document" formControlName="documentNumber" [class.invalid-input]="p.get('documentNumber')?.invalid && p.get('documentNumber')?.touched">
+                    @if (p.get('documentNumber')?.invalid && p.get('documentNumber')?.touched) {
+                    <span class="error-text">Required field</span>
+                    }
+                  </div>
+                  <div class="input-wrap checkbox-wrap">
+                    <label class="check-container">
+                      <input type="checkbox" formControlName="ispassport">
+                      <span class="checkmark"></span>
+                      Document is a Passport
+                    </label>
+                  </div>
+                </div>
+              </div>
+              }
+            </div>
+
+            <div class="form-footer-actions">
+              <button type="button" class="add-p-btn" (click)="addPassenger()">+ Add Passenger</button>
+              <button type="button" class="confirm-p-btn" [disabled]="bookingForm.invalid || bookingLoading()" (click)="confirmBooking()">
+                {{ bookingLoading() ? 'Processing...' : 'Confirm Booking' }}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   </div>
-</div>
-}
+  }
 
-<!-- SUCCESS POPUP -->
-<div class="success-overlay" [class.active]="showSuccessContent()">
-  <div class="success-card">
-    <div class="success-icon">&check;</div>
-    <h2>Booking Successful!</h2>
-    <p class="success-subtitle">Your reservation has been confirmed.</p>
+  <!-- SUCCESS POPUP -->
+  <div class="success-overlay" [class.active]="showSuccessContent()">
+    <div class="success-card">
+      <div class="success-icon">&check;</div>
+      <h2>Booking Successful!</h2>
+      <p class="success-subtitle">Your reservation has been confirmed.</p>
 
-    @if (bookingSuccessData()) {
-    <div class="booking-details-box">
-      <div class="ref-section">
-        <label>Booking Reference</label>
-        <div class="ref-code">{{ bookingSuccessData().referenceCode }}</div>
+      @if (bookingSuccessData()) {
+      <div class="booking-details-box">
+        <div class="ref-section">
+          <label>Booking Reference</label>
+          <div class="ref-code">{{ bookingSuccessData().referenceCode }}</div>
+        </div>
+
+        <div class="details-grid">
+          <div class="detail-item">
+            <label>Flight Number</label>
+            <span>{{ bookingSuccessData().flightNumber }}</span>
+          </div>
+          <div class="detail-item">
+            <label>Provider</label>
+            <span>{{ bookingSuccessData().provider }}</span>
+          </div>
+          <div class="detail-item wide">
+            <label>Route</label>
+            <span>{{ bookingSuccessData().cityOrigin }} ({{ bookingSuccessData().countryOrigin }}) to {{ bookingSuccessData().cityDestiny }} ({{ bookingSuccessData().countryDestiny }})</span>
+          </div>
+          <div class="detail-item">
+            <label>Airport Codes</label>
+            <span>{{ bookingSuccessData().airportOriginCode }} &rarr; {{ bookingSuccessData().airportDestinyCode }}</span>
+          </div>
+          <div class="detail-item">
+            <label>Airports</label>
+            <span class="small-text">"{{ bookingSuccessData().airportOriginName }}" &rarr; "{{ bookingSuccessData().airportDestinyName }}"</span>
+          </div>
+          <div class="detail-item">
+            <label>Departure Time</label>
+            <span>{{ bookingSuccessData().flightDepartureTime | date:'MMM d, yyyy HH:mm' }}</span>
+          </div>
+          <div class="detail-item">
+            <label>Passengers</label>
+            <span>{{ bookingSuccessData().passengerCount }}</span>
+          </div>
+          <div class="detail-item">
+            <label>Cabin Type</label>
+            <span>{{ getCabinName(bookingSuccessData().cabinType) }}</span>
+          </div>
+          <div class="detail-item">
+            <label>Duration</label>
+            <span>{{ formatDuration(bookingSuccessData().durationMinutes) }}</span>
+          </div>
+          <div class="detail-item wide price-detail">
+            <label>Total Price Paid</label>
+            <span class="success-price">${{ bookingSuccessData().priceTotal }}</span>
+          </div>
+        </div>
       </div>
+      }
 
-      <div class="details-grid">
-        <div class="detail-item">
-          <label>Flight Number</label>
-          <span>{{ bookingSuccessData().flightNumber }}</span>
-        </div>
-        <div class="detail-item">
-          <label>Provider</label>
-          <span>{{ bookingSuccessData().provider }}</span>
-        </div>
-        <div class="detail-item wide">
-          <label>Route</label>
-          <span>{{ bookingSuccessData().cityOrigin }} ({{ bookingSuccessData().countryOrigin }}) to {{ bookingSuccessData().cityDestiny }} ({{ bookingSuccessData().countryDestiny }})</span>
-        </div>
-        <div class="detail-item">
-          <label>Airport Codes</label>
-          <span>{{ bookingSuccessData().airportOriginCode }} &rarr; {{ bookingSuccessData().airportDestinyCode }}</span>
-        </div>
-        <div class="detail-item">
-          <label>Airports</label>
-          <span class="small-text">"{{ bookingSuccessData().airportOriginName }}" &rarr; "{{ bookingSuccessData().airportDestinyName }}"</span>
-        </div>
-        <div class="detail-item">
-          <label>Departure Time</label>
-          <span>{{ bookingSuccessData().flightDepartureTime | date:'MMM d, yyyy HH:mm' }}</span>
-        </div>
-        <div class="detail-item">
-          <label>Passengers</label>
-          <span>{{ bookingSuccessData().passengerCount }}</span>
-        </div>
-        <div class="detail-item">
-          <label>Cabin Type</label>
-          <span>{{ getCabinName(bookingSuccessData().cabinType) }}</span>
-        </div>
-        <div class="detail-item">
-          <label>Duration</label>
-          <span>{{ formatDuration(bookingSuccessData().durationMinutes) }}</span>
-        </div>
-        <div class="detail-item wide price-detail">
-          <label>Total Price Paid</label>
-          <span class="success-price">${{ bookingSuccessData().priceTotal }}</span>
-        </div>
+      <button class="search-btn centered-btn" (click)="closeSuccessPopup()">Back to Search</button>
+    </div>
+  </div>
+
+  <!-- ERROR POPUP -->
+  <div class="error-overlay" [class.active]="errorMessage()">
+    <div class="error-card">
+      <div class="error-icon">!</div>
+      <h2>Booking Failed</h2>
+      <p class="error-msg-body">{{ errorMessage() }}</p>
+      <button class="dismiss-btn" (click)="closeErrorPopup()">Dismiss</button>
+    </div>
+  </div>
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <span class="brand-name">SkyRoute</span>
+        <p>© 2026 SkyRoute International. All rights reserved.</p>
+      </div>
+      <div class="footer-links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Cookie Settings</a>
       </div>
     </div>
-    }
-
-    <button class="search-btn centered-btn" (click)="closeSuccessPopup()">Back to Search</button>
-  </div>
-</div>
-
-<!-- ERROR POPUP -->
-<div class="error-overlay" [class.active]="errorMessage()">
-  <div class="error-card">
-    <div class="error-icon">!</div>
-    <h2>Booking Failed</h2>
-    <p class="error-msg-body">{{ errorMessage() }}</p>
-    <button class="dismiss-btn" (click)="closeErrorPopup()">Dismiss</button>
-  </div>
+  </footer>
 </div>

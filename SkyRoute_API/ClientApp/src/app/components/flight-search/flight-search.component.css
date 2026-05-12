@@ -540,3 +540,250 @@ select, input {
   max-width: 300px;
   margin: 0 auto;
 }
+
+:host {
+  --primary: #003580; /* Classic Airline Blue */
+  --accent: #006ce4;
+  --success: #008009;
+  --bg: #f5f7fa;
+  --text: #1a1a1a;
+  --card-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.page-wrapper {
+  background-color: var(--bg);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* NAVBAR */
+.navbar {
+  background: var(--primary);
+  color: white;
+  padding: 1rem 0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-icon {
+  font-size: 24px;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-name {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+.brand-motto {
+  font-size: 11px;
+  opacity: 0.8;
+  text-transform: uppercase;
+}
+
+.nav-links {
+  display: flex;
+  gap: 20px;
+}
+
+  .nav-links a {
+    color: white;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+    .nav-links a.active {
+      border-bottom: 2px solid white;
+      padding-bottom: 4px;
+    }
+
+/* HERO */
+.hero {
+  background: linear-gradient(rgba(0,53,128,0.8), rgba(0,53,128,0.8)), url('https://images.unsplash.com/photo-1436491865332-7a61a109c05d?auto=format&fit=crop&w=1200&q=80');
+  background-size: cover;
+  background-position: center;
+  color: white;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+  .hero h1 {
+    font-size: 42px;
+    margin-bottom: 10px;
+  }
+
+  .hero p {
+    font-size: 18px;
+    opacity: 0.9;
+  }
+
+/* MAIN CONTAINER */
+.main-content {
+  margin-top: -40px;
+  flex: 1;
+}
+
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding-bottom: 60px;
+}
+
+/* SEARCH CARD */
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: var(--card-shadow);
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 25px;
+}
+
+  .section-header h3 {
+    margin: 0;
+    color: var(--primary);
+  }
+
+.search-btn-primary {
+  width: 100%;
+  padding: 16px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 25px;
+  transition: transform 0.1s;
+}
+
+  .search-btn-primary:hover:not(:disabled) {
+    background: #005bbd;
+  }
+
+  .search-btn-primary:active {
+    transform: scale(0.99);
+  }
+
+/* INPUTS */
+select, input {
+  margin-bottom: 10px;
+  border: 1px solid #ced4da;
+}
+
+  select:disabled {
+    background-color: #f8f9fa !important;
+    pointer-events: none;
+  }
+
+/* TABLES */
+.modern-table {
+  width: 100%;
+  margin-top: 30px;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--card-shadow);
+}
+
+  .modern-table th {
+    background: #f8f9fa;
+    color: #4b5563;
+    font-weight: 600;
+    padding: 15px;
+  }
+
+.route-info strong {
+  display: block;
+  font-size: 16px;
+}
+
+.route-info span {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.price-tag {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--success);
+}
+
+.provider-tag {
+  background: #eef2ff;
+  color: #4338ca;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.book-btn-action {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* FOOTER */
+.footer {
+  background: white;
+  border-top: 1px solid #e5e7eb;
+  padding: 40px 0;
+  color: #6b7280;
+}
+
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 20px;
+}
+
+.footer-brand .brand-name {
+  color: var(--primary);
+  margin-bottom: 10px;
+  display: block;
+}
+
+.footer-links {
+  display: flex;
+  gap: 20px;
+  font-size: 14px;
+}
+
+  .footer-links a {
+    color: #6b7280;
+    text-decoration: none;
+  }
