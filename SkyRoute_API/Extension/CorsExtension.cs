@@ -2,12 +2,13 @@
 {
     public static IServiceCollection AddCustomCors(this IServiceCollection services)
     {
+        
         services.AddCors(options => { options
             .AddPolicy("AllowCredentials", policy => { policy
                 .AllowAnyOrigin()
                 .AllowAnyHeader()
                 .AllowAnyMethod(); }); });
-
+        /*
         services.AddCors(options => {
             options
             .AddPolicy("AngularDevPolicy", policy => {
@@ -16,7 +17,7 @@
                 .AllowAnyMethod();
             });
         });
-
+        */
         return services;
 
     }
