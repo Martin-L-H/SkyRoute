@@ -1,4 +1,6 @@
-﻿public class GlobalAirProvider : IFlightProvider
+﻿using SkyRoute_Domain.Entities;
+
+public class GlobalAirProvider : IFlightProvider
 {
     private readonly IFlightRepository _flightRepo;
     private const string PROVIDER_NAME = "GlobalAir";
@@ -28,34 +30,34 @@
         return rawFlights
             .Where(f => f.ProviderName == PROVIDER_NAME)
             .Select(f => new FlightSearchResponseDTO
-            {
-                Id = f.Id,
-                FlightNumber = f.FlightNumber,
-                ProviderName = PROVIDER_NAME,
-                CodeIATAOrigin = f.AirportOrigin?.CodeIATA ?? UNKNOWN_NAME,
-                AirportOriginName = f.AirportOrigin?.PublicName ?? UNKNOWN_NAME,
-                AirportOriginId = f.AirportOriginId,
-                CityOriginName = f.AirportOrigin?.City?.Name ?? UNKNOWN_NAME,
-                CityOriginId = f.AirportOrigin?.City?.Id ?? 0,
-                CountryOriginName = f.AirportOrigin?.City?.Country?.Name ?? UNKNOWN_NAME,
-                CountryOriginId = f.AirportOrigin?.City?.CountryId ?? 0,
-                AirportDestinationId = f.AirportDestinationId,
-                CodeIATADestination = f.AirportDestination?.CodeIATA ?? UNKNOWN_NAME,
-                AirportDestinationName = f.AirportDestination?.PublicName ?? UNKNOWN_NAME,
-                CityDestinationId = f.AirportDestination?.City?.Id ?? 0,
-                CityDestinationName = f.AirportDestination?.City?.Name ?? UNKNOWN_NAME,
-                CountryDestinationId = f.AirportDestination?.City?.CountryId ?? 0,
-                CountryDestinationName = f.AirportDestination?.City?.Country?.Name ?? UNKNOWN_NAME,
-                TimeDeparture = f.TimeDeparture,
-                TimeArrival = f.TimeArrival,
-                CabinType = f.CabinType,
-                DurationMinutes = f.DurationMinutes,
-                SeatsTotal = f.SeatsTotal,
-                SeatsFree = f.SeatsFree,
-                BaseFare = f.BaseFare,
-                PricePerPerson = GetPricingPerPerson(f.BaseFare),
-                PriceTotal = GetPricingPerPerson(f.BaseFare) * requestDTO.minimumFreeSeats,
-            });
+            (
+                id : f.Id,
+                flightNumber : f.FlightNumber,
+                timeDeparture: f.TimeDeparture,
+                timeArrival: f.TimeArrival,
+                baseFare: f.BaseFare,
+                cabinType: f.CabinType,
+                providerName : PROVIDER_NAME,
+                codeIATAOrigin : f.AirportOrigin?.CodeIATA ?? UNKNOWN_NAME,
+                airportOriginName : f.AirportOrigin?.PublicName ?? UNKNOWN_NAME,
+                airportOriginId : f.AirportOriginId,
+                cityOriginName : f.AirportOrigin?.City?.Name ?? UNKNOWN_NAME,
+                cityOriginId : f.AirportOrigin?.City?.Id ?? 0,
+                countryOriginName : f.AirportOrigin?.City?.Country?.Name ?? UNKNOWN_NAME,
+                countryOriginId : f.AirportOrigin?.City?.CountryId ?? 0,
+                codeIATADestination: f.AirportDestination?.CodeIATA ?? UNKNOWN_NAME,
+                airportDestinationName: f.AirportDestination?.PublicName ?? UNKNOWN_NAME,
+                airportDestinationId : f.AirportDestinationId,
+                cityDestinationId : f.AirportDestination?.City?.Id ?? 0,
+                cityDestinationName : f.AirportDestination?.City?.Name ?? UNKNOWN_NAME,
+                countryDestinationName: f.AirportDestination?.City?.Country?.Name ?? UNKNOWN_NAME,
+                countryDestinationId : f.AirportDestination?.City?.CountryId ?? 0,
+                pricePerPerson: GetPricingPerPerson(f.BaseFare),
+                priceTotal: GetPricingPerPerson(f.BaseFare) * requestDTO.minimumFreeSeats,
+                seatsTotal: f.SeatsTotal,
+                seatsFree: f.SeatsFree,
+                durationMinutes : f.DurationMinutes
+            ));
     }
 
     public decimal GetPricingPerPerson(decimal baseFare)

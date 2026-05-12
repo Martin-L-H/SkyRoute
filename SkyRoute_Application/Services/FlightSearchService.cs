@@ -1,4 +1,6 @@
-﻿public class FlightSearchService : IFlightSearchService
+﻿using SkyRoute_Domain.Entities;
+
+public class FlightSearchService : IFlightSearchService
 {
     private readonly IEnumerable<IFlightProvider> _providers;
 
@@ -39,10 +41,42 @@
         var searchTasks = providersToRun.Select(p => p.GetFlightsAsync(request));
 
         var resultsFromAllProviders = await Task.WhenAll(searchTasks);
-
+        /*
         var flightListDTO = resultsFromAllProviders
             .SelectMany(result => result)
-            .OrderBy(f => f.TimeDeparture)
+            .OrderBy(f => f.timeDeparture)
+            .ToList();
+        */
+        var flightListDTO = resultsFromAllProviders
+            .SelectMany(result => result.Select(f => new FlightSearchResponseDTO(
+                f.id,
+                f.flightNumber,
+                f.timeDeparture,
+                f.timeArrival,
+                f.baseFare,
+                f.cabinType,
+                f.providerName,
+                f.codeIATAOrigin,
+                f.airportOriginName,
+                f.airportOriginId,
+                f.cityOriginName,
+                f.cityOriginId,
+                f.countryOriginName,
+                f.countryOriginId,
+                f.codeIATADestination,
+                f.airportDestinationName,
+                f.airportDestinationId,
+                f.cityDestinationId,
+                f.cityDestinationName,
+                f.countryDestinationName,
+                f.countryDestinationId,
+                f.pricePerPerson,
+                f.priceTotal,
+                f.seatsTotal,
+                f.seatsFree,
+                f.durationMinutes
+                )))
+            .OrderBy(f => f.timeDeparture)
             .ToList();
 
         return ServiceResponse<IEnumerable<FlightSearchResponseDTO>>.BuildSuccess(flightListDTO);

@@ -13,15 +13,15 @@ public class AirportSearchService : IAirportSearchService
         var airportList = await _repository.GetAirportsWithDetailsAsync("","","");
 
         IEnumerable<AirportSearchResponseDTO> dtoList = airportList.Select(found => new AirportSearchResponseDTO
-        {
-            Id = found.Id,
-            Name = found.PublicName ?? "Unknown",
-            CodeIATA = found.CodeIATA ?? "---",
-            CityName = found.City?.Name ?? "Unknown City",
-            CountryName = found.City?.Country?.Name ?? "Unknown Country",
-            CountryId = found.City?.CountryId ?? 0,
-            CityId = found.City?.Id ?? 0
-        });
+        (
+            id : found.Id,
+            name : found.PublicName ?? "Unknown",
+            codeIATA : found.CodeIATA ?? "---",
+            cityName : found.City?.Name ?? "Unknown City",
+            cityId: found.City?.Id ?? 0,
+            countryName : found.City?.Country?.Name ?? "Unknown Country",
+            countryId : found.City?.CountryId ?? 0
+        ));
 
         return dtoList;
     }
@@ -36,15 +36,16 @@ public class AirportSearchService : IAirportSearchService
         }
 
         IEnumerable<AirportSearchResponseDTO> dtoList = airportList.Select(found => new AirportSearchResponseDTO
-        {
-            Id = found.Id,
-            Name = found.PublicName ?? "Unknown",
-            CodeIATA = found.CodeIATA ?? "---",
-            CityName = found.City?.Name ?? "Unknown City",
-            CountryName = found.City?.Country?.Name ?? "Unknown Country",
-            CountryId = found.City?.CountryId ?? 0,
-            CityId = found.City?.Id ?? 0
-        });
+        (
+            id : found.Id,
+            name : found.PublicName ?? "Unknown",
+            codeIATA : found.CodeIATA ?? "---",
+            cityName : found.City?.Name ?? "Unknown City",
+            cityId: found.City?.Id ?? 0,
+            countryName : found.City?.Country?.Name ?? "Unknown Country",
+            countryId : found.City?.CountryId ?? 0
+            
+        ));
 
         return ServiceResponse<IEnumerable<AirportSearchResponseDTO>>.BuildSuccess(dtoList);
     }
@@ -66,16 +67,16 @@ public class AirportSearchService : IAirportSearchService
 
         }
 
-        AirportSearchResponseDTO response = new AirportSearchResponseDTO()
-        {
-            Id = found.Id,
-            Name = found.PublicName,
-            CodeIATA = found.CodeIATA,
-            CityName = found.City?.Name ?? "Unknown City",
-            CountryName = found.City?.Country?.Name ?? "Unknown Country",
-            CountryId = found.City?.CountryId ?? 0,
-            CityId = found.City?.Id ?? 0
-        };
+        AirportSearchResponseDTO response = new AirportSearchResponseDTO
+        (
+            id : found.Id,
+            name : found.PublicName,
+            codeIATA : found.CodeIATA,
+            cityName : found.City?.Name ?? "Unknown City",
+            cityId : found.City?.Id ?? 0,
+            countryName : found.City?.Country?.Name ?? "Unknown Country",
+            countryId : found.City?.CountryId ?? 0
+        );
 
         return ServiceResponse<AirportSearchResponseDTO>.BuildSuccess(response);
     }

@@ -1,0 +1,1 @@
+﻿public record EnumDisplayResponseDTO(int id, string name);

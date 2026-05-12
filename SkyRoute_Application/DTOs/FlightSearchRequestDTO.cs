@@ -23,7 +23,7 @@ public class FlightSearchRequestDTO
 
 
     [Required]
-    [Range(1, int.MaxValue, ErrorMessage = "Minimum free seats must be at least 1")]
+    [Range(1, 9, ErrorMessage = "You can only search for a number between 1 and 9")]
 
     public int minimumFreeSeats { get; set; }
 

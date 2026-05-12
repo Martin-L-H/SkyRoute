@@ -38,7 +38,7 @@ public class BookingRepository : IBookingRepository
                 return null;
 
             }
-            
+            //Using a job could make this insertion atomic to avoid accidental overbooking
             flight.SeatsFree = flight.SeatsFree - booking.PassengerCount;
 
             context.Bookings.Add(booking);

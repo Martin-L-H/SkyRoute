@@ -129,28 +129,28 @@ public class BookingService : IBookingService
         //Start building the DTO
         TimeSpan difference = flightFound.TimeArrival - flightFound.TimeDeparture; //Code to get the duration of the flight
 
-        BookingResponseDTO successBookingDTO = new BookingResponseDTO()
-        {
-            ReferenceCode = result.ReferenceCode,
-            FlightDepartureTime = flightFound.TimeDeparture,
-            FlightArrivalTime = flightFound.TimeArrival,
-            DurationMinutes = (int)Math.Round(difference.TotalMinutes),
-            Provider = result.Provider,
-            CabinType = result.CabinType,
-            PassengerCount = result.PassengerCount,
-            FlightNumber = flightFound.FlightNumber,
-            PriceTotal = result.PriceTotal,
+        BookingResponseDTO successBookingDTO = new BookingResponseDTO
+        (
+            referenceCode : result.ReferenceCode,
+            flightDepartureTime : flightFound.TimeDeparture,
+            flightArrivalTime : flightFound.TimeArrival,
+            durationMinutes : (int)Math.Round(difference.TotalMinutes),
+            provider : result.Provider,
+            cabinType : result.CabinType,
+            passengerCount : result.PassengerCount,
+            flightNumber : flightFound.FlightNumber,
+            priceTotal : result.PriceTotal,
 
-            AirportOriginName = flightFound.AirportOrigin?.PublicName ?? UNKNOWN_DATA,
-            AirportOriginCode = flightFound.AirportOrigin?.CodeIATA ?? UNKNOWN_DATA,
-            CityOrigin = flightFound.AirportOrigin?.City?.Name ?? UNKNOWN_DATA,
-            CountryOrigin = flightFound.AirportOrigin?.City?.Country?.Name ?? UNKNOWN_DATA,
+            airportOriginName : flightFound.AirportOrigin?.PublicName ?? UNKNOWN_DATA,
+            airportOriginCode : flightFound.AirportOrigin?.CodeIATA ?? UNKNOWN_DATA,
+            cityOrigin : flightFound.AirportOrigin?.City?.Name ?? UNKNOWN_DATA,
+            countryOrigin : flightFound.AirportOrigin?.City?.Country?.Name ?? UNKNOWN_DATA,
 
-            AirportDestinyName = flightFound.AirportDestination?.PublicName ?? UNKNOWN_DATA,
-            AirportDestinyCode = flightFound.AirportDestination?.CodeIATA ?? UNKNOWN_DATA,
-            CityDestiny = flightFound.AirportDestination?.City?.Name ?? UNKNOWN_DATA,
-            CountryDestiny = flightFound.AirportDestination?.City?.Country?.Name ?? UNKNOWN_DATA
-        };
+            airportDestinyName : flightFound.AirportDestination?.PublicName ?? UNKNOWN_DATA,
+            airportDestinyCode : flightFound.AirportDestination?.CodeIATA ?? UNKNOWN_DATA,
+            cityDestiny : flightFound.AirportDestination?.City?.Name ?? UNKNOWN_DATA,
+            countryDestiny : flightFound.AirportDestination?.City?.Country?.Name ?? UNKNOWN_DATA
+        );
 
         return ServiceResponse<BookingResponseDTO>.BuildSuccess(successBookingDTO);
 

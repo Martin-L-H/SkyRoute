@@ -9,6 +9,7 @@ import { FlightService } from '../../services/flight.service';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './flight-search.component.html',
+  styleUrl: './flight-search.component.css',
 })
 export class FlightSearchComponent implements OnInit {
   private fb = inject(FormBuilder);
@@ -23,7 +24,7 @@ export class FlightSearchComponent implements OnInit {
   isLoading = signal(false);
   selectedFlight = signal<any | null>(null);
   bookingLoading = signal(false);
-  bookingSuccessData = signal<any | null>(null); // This will hold the "data" object from response
+  bookingSuccessData = signal<any | null>(null);
   showSuccessContent = signal(false);
   errorMessage = signal<string | null>(null);
 
@@ -38,7 +39,7 @@ export class FlightSearchComponent implements OnInit {
     CabinTypeId: [null as number | null],
     Provider: [''],
     TimeDeparture: [''],
-    minimumFreeSeats: [1]
+    minimumFreeSeats: [1, [Validators.min(1), Validators.max(9)]]
   });
 
   // Booking Form
@@ -58,13 +59,15 @@ export class FlightSearchComponent implements OnInit {
     const sort = this.sortState();
 
     let filtered = list.filter(f => {
+      const cabinFilterActive = filters?.CabinTypeId !== null && filters?.CabinTypeId !== undefined;
+
       return (!filters?.CountryOriginId || f.countryOriginId === filters.CountryOriginId) &&
         (!filters?.CityOriginId || f.cityOriginId === filters.CityOriginId) &&
         (!filters?.AirportOriginId || f.airportOriginId === filters.AirportOriginId) &&
         (!filters?.CountryDestinationId || f.countryDestinationId === filters.CountryDestinationId) &&
         (!filters?.CityDestinationId || f.cityDestinationId === filters.CityDestinationId) &&
         (!filters?.AirportDestinationId || f.airportDestinationId === filters.AirportDestinationId) &&
-        (!filters?.CabinTypeId || f.cabinType === filters.CabinTypeId) &&
+        (!cabinFilterActive || f.cabinType === filters?.CabinTypeId) &&
         (!filters?.minimumFreeSeats || f.seatsFree >= filters.minimumFreeSeats) &&
         (!filters?.TimeDeparture || f.timeDeparture.startsWith(filters.TimeDeparture));
     });
@@ -147,12 +150,32 @@ export class FlightSearchComponent implements OnInit {
 
   onSearch() {
     this.isLoading.set(true);
-    this.flightService.searchFlights(this.searchForm.value).subscribe({
+
+    const rawValue = this.searchForm.value;
+    const cleanRequest = Object.fromEntries(
+      Object.entries(rawValue).filter(([_, v]) => v !== null && v !== '')
+    );
+
+    this.flightService.searchFlights(cleanRequest).subscribe({
       next: (results) => {
         this.rawFlights.set(results);
         this.isLoading.set(false);
       },
-      error: () => this.isLoading.set(false)
+      error: (err) => {
+        this.isLoading.set(false);
+
+        let msg = "An error occurred while searching for flights.";
+
+        if (typeof err.error === 'string') {
+          msg = err.error;
+        } else if (err.error?.errors) {
+          msg = Object.values(err.error.errors).flat().join(' ');
+        } else if (err.error?.message) {
+          msg = err.error.message;
+        }
+
+        this.errorMessage.set(msg);
+      }
     });
   }
 
@@ -215,13 +238,12 @@ export class FlightSearchComponent implements OnInit {
     this.flightService.bookFlight(this.bookingForm.value).subscribe({
       next: (res) => {
         this.onSearch();
-        // Handle both "res.data" and "res" scenarios
         this.bookingSuccessData.set(res.data || res);
         this.closeBooking();
         setTimeout(() => this.showSuccessContent.set(true), 50);
       },
       error: (err) => {
-        const msg = typeof err.error === 'string' ? err.error : (err.error?.message || "An error occurred while processing your booking.");
+        const msg = typeof err.error === 'string' ? err.error : (err.error?.message || "An error occurred.");
         this.errorMessage.set(msg);
         this.bookingLoading.set(false);
       },
@@ -232,13 +254,27 @@ export class FlightSearchComponent implements OnInit {
   closeErrorPopup() {
     const overlay = document.querySelector('.error-overlay');
     if (overlay) overlay.classList.remove('active');
+
     setTimeout(() => {
       this.errorMessage.set(null);
     }, 400);
   }
 
-  closeBooking() { this.selectedFlight.set(null); this.bookingForm.reset(); }
-  closeSuccessPopup() { this.showSuccessContent.set(false); this.bookingSuccessData.set(null); }
+  closeBooking() {
+    this.selectedFlight.set(null);
+    this.bookingForm.reset();
+  }
+
+  closeSuccessPopup() {
+    // Start the fade out animation
+    this.showSuccessContent.set(false);
+
+    // Wait for the animation to finish before clearing the data
+    setTimeout(() => {
+      this.bookingSuccessData.set(null);
+    }, 400);
+  }
+
   formatDuration(min: number) { return `${Math.floor(min / 60)}h ${min % 60}m`; }
   closeOnBackdrop(event: MouseEvent) {
     if ((event.target as HTMLElement).classList.contains('modal-backdrop')) this.closeBooking();

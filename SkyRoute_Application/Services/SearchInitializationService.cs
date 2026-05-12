@@ -18,20 +18,18 @@ public class SearchInitializationService : ISearchInitializationService
         
         IEnumerable<AirportSearchResponseDTO> airports = await _airportService.GetAllAirportsWithDetailsAsync();
         IEnumerable<string> providers =  _flightService.GetAvailableProviders();
-        var cabinTypes = Enum.GetValues(typeof(CabinType)) //This code is disgusting, but it works.
+        var cabinTypes = Enum.GetValues(typeof(CabinType))
             .Cast<CabinType>()
-            .Select(c => new EnumDisplayDTO
-        {
-            Id = (int)c,
-            Name = c.ToString()
-        })
-        .ToList(); ;
-
-        SearchInitializationDTO response = new SearchInitializationDTO();
-        response.Airports = airports;
-        response.Providers = providers;
-        response.CabinTypes = cabinTypes;
+            .Select(c => new EnumDisplayResponseDTO
+        (
+            id : (int)c,
+            name : c.ToString()
+        ))
+        .ToList();
+        //Testing with record class DTOs
+        SearchInitializationDTO response = new SearchInitializationDTO(airports, cabinTypes, providers);
 
         return ServiceResponse<SearchInitializationDTO>.BuildSuccess(response);
+
     }
 }

@@ -94,7 +94,7 @@ public class FlightRepository : IFlightRepository
         if (destinyAirportId != null)
         {
 
-            query = query.Where(p => p.Id == destinyAirportId);
+            query = query.Where(p => p.AirportDestinationId == destinyAirportId);
 
         }
 
