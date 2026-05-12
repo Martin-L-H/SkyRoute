@@ -94,6 +94,9 @@
           <th class="sort-header" (click)="setSort('timeDeparture')">
             Departure {{ sortState().key === 'timeDeparture' ? (sortState().dir === 'asc' ? '↑' : '↓') : '↕' }}
           </th>
+          <th class="sort-header" (click)="setSort('timeArrival')">
+            Arrival {{ sortState().key === 'timeArrival' ? (sortState().dir === 'asc' ? '↑' : '↓') : '↕' }}
+          </th>
           <th class="sort-header" (click)="setSort('durationMinutes')">
             Duration {{ sortState().key === 'durationMinutes' ? (sortState().dir === 'asc' ? '↑' : '↓') : '↕' }}
           </th>
@@ -124,7 +127,18 @@
           <td><span class="flight-no-chip">{{ flight.flightNumber }}</span></td>
           <td>{{ flight.providerName }}</td>
           <td><span class="cabin-label">{{ getCabinName(flight.cabinType) }}</span></td>
-          <td>{{ flight.timeDeparture | date:'MMM d, HH:mm' }}</td>
+          <td>
+            <div class="time-stack">
+              <strong>{{ flight.timeDeparture | date:'HH:mm' }}</strong>
+              <small>{{ flight.timeDeparture | date:'MMM d' }}</small>
+            </div>
+          </td>
+          <td>
+            <div class="time-stack">
+              <strong>{{ flight.timeArrival | date:'HH:mm' }}</strong>
+              <small>{{ flight.timeArrival | date:'MMM d' }}</small>
+            </div>
+          </td>
           <td>{{ formatDuration(flight.durationMinutes) }}</td>
           <td><strong>${{ flight.priceTotal }}</strong></td>
           <td>{{ flight.seatsFree }} left</td>

@@ -94,6 +94,24 @@ select, input {
   margin-top: 2px;
 }
 
+.time-stack {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.4;
+}
+
+  .time-stack strong {
+    color: #000;
+    font-weight: bold;
+    font-size: 15px;
+  }
+
+  .time-stack small {
+    color: #007bff;
+    font-size: 12px;
+    margin-top: 2px;
+  }
+
 .flight-no-chip {
   background: #f1f3f5;
   padding: 4px 8px;
@@ -407,8 +425,8 @@ select, input {
   .dismiss-btn:hover {
     background: #000;
   }
-
 /* NEW SUCCESS DETAILS STYLES */
+
 .booking-details-box {
   background: #f8f9fa;
   border: 1px solid #e9ecef;
