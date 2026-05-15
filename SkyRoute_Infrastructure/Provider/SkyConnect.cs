@@ -1,4 +1,6 @@
-﻿public class SkyConnectProvider : IFlightProvider
+﻿using SkyRoute_Domain.Entities;
+
+public class SkyConnectProvider : IFlightProvider
 {
     private readonly IFlightRepository _flightRepo;
     private const string PROVIDER_NAME = "SkyConnect";
@@ -13,7 +15,7 @@
     public async Task<IEnumerable<FlightSearchResponseDTO>> GetFlightsAsync(FlightSearchRequestDTO requestDTO)
     {
 
-        var rawFlights = await _flightRepo.SearchSpecificFlightsAsync(
+        IEnumerable<Flight> rawFlights = await _flightRepo.SearchSpecificFlightsAsync(
             requestDTO.AirportOriginId,
             requestDTO.CityOriginId,
             requestDTO.CountryOriginId,
@@ -25,7 +27,7 @@
             requestDTO.DurationMinutes,
             requestDTO.minimumFreeSeats);
 
-        return rawFlights
+        IEnumerable<FlightSearchResponseDTO> preFilteredDTO = rawFlights
             .Where(f => f.ProviderName == PROVIDER_NAME)
             .Select(f => new FlightSearchResponseDTO
             (
@@ -56,6 +58,13 @@
                 seatsFree: f.SeatsFree,
                 durationMinutes: f.DurationMinutes
             ));
+        //Ugly code. The list of flights is obtained then filtered by the maximum allowed price, but because
+        //this has to be done after the discount or overcharge calculation, it cannot be made in the repository
+        if (requestDTO.maximumPrice != null && requestDTO.maximumPrice > 0)
+        {
+            preFilteredDTO = preFilteredDTO.Where(x => x.priceTotal <= requestDTO.maximumPrice);
+        }
+        return preFilteredDTO;
     }
 
     public decimal GetPricingPerPerson(decimal baseFare)

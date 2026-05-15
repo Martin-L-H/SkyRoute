@@ -90,7 +90,7 @@ select, input {
 
   .flight-table th, .flight-table td {
     border-bottom: 1px solid #eee;
-    padding: 15px;
+    padding: 5px;
     text-align: left;
     vertical-align: top;
   }
@@ -107,7 +107,7 @@ select, input {
 }
 
 .iata-sub {
-  font-size: 13px;
+  font-size: 10px;
   color: #007bff;
   margin-top: 2px;
 }
@@ -152,7 +152,7 @@ select, input {
   background: #28a745;
   color: white;
   border: none;
-  padding: 8px 16px;
+  padding: 6px 12px;
   border-radius: 6px;
   cursor: pointer;
   font-weight: bold;

@@ -40,6 +40,15 @@ public class BookingService : IBookingService
 
         }
 
+        if (request.PassengerCount > 9)
+        {
+
+            _logger.LogError($"Failed to create booking for flight, too many passengers {request}");
+
+            return ServiceResponse<BookingResponseDTO>.BuildError("You can't book for more than 9 people!");
+
+        }
+
         var provider = _providers.FirstOrDefault(p => p.Provider.Equals(request.ProviderName, StringComparison.OrdinalIgnoreCase));
 
         if (provider == null)

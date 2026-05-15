@@ -21,7 +21,7 @@ public class FlightSearchRequestDTO
     public int? CountryDestinationId { get; set; }
     public string? CountryDestinationName { get; set; }
 
-    public decimal? maximumPricePerPerson { get; set; }
+    public decimal? maximumPrice { get; set; }
 
 
     [Required]

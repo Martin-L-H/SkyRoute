@@ -39,13 +39,14 @@ public class FlightSearchService : IFlightSearchService
 
         }
 
+
         var searchTasks = providersToRun.Select(p => p.GetFlightsAsync(request));
 
         var resultsFromAllProviders = await Task.WhenAll(searchTasks);
 
-        
 
-        var flightListDTO = resultsFromAllProviders
+        //Is there a simpler way to do this? Something tells me I shouldn't have to re-do the DTO list but I can't figure out how.
+        IEnumerable<FlightSearchResponseDTO> flightListDTO = resultsFromAllProviders
             .SelectMany(result => result.Select(f => new FlightSearchResponseDTO(
                 f.id,
                 f.flightNumber,
@@ -77,9 +78,10 @@ public class FlightSearchService : IFlightSearchService
             .OrderBy(f => f.timeDeparture)
             .ToList();
 
-        IEnumerable<FlightSearchResponseDTO> filteredList = flightListDTO.Where(p => p.pricePerPerson <= request.maximumPricePerPerson);
 
-        return ServiceResponse<IEnumerable<FlightSearchResponseDTO>>.BuildSuccess(filteredList);
+        //IEnumerable<FlightSearchResponseDTO> filteredList = flightListDTO.Where(p => p.pricePerPerson <= request.maximumPricePerPerson);
+
+        return ServiceResponse<IEnumerable<FlightSearchResponseDTO>>.BuildSuccess(flightListDTO);
     }
 
     public IEnumerable<string> GetAvailableProviders()

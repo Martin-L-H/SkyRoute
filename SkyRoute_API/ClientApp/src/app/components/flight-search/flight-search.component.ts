@@ -39,6 +39,7 @@ export class FlightSearchComponent implements OnInit {
     CabinTypeId: [null as number | null],
     Provider: [''],
     TimeDeparture: [''],
+    maximumPrice: [,[Validators.min(1)]],
     minimumFreeSeats: [1, [Validators.min(1), Validators.max(9)]]
   });
 
@@ -126,7 +127,7 @@ export class FlightSearchComponent implements OnInit {
     this.bookingFormSignal();
     const flight = this.selectedFlight();
     const count = this.passengers.length;
-    return (flight?.priceTotal || 0) * count;
+    return (flight?.pricePerPerson || 0) * count;
   });
 
   ngOnInit() {
@@ -188,11 +189,15 @@ export class FlightSearchComponent implements OnInit {
   }
 
   addPassenger() {
+    if (this.passengers.length >= 9) {
+      alert('You cannot add more than 9 passengers to a single booking.');
+      return;
+    }
     this.passengers.push(this.fb.group({
-      firstname: ['', Validators.required],
-      lastname: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
-      documentNumber: ['', Validators.required],
+      firstname: ['John', Validators.required],
+      lastname: ['Doe', Validators.required],
+      email: ['JohnDoe@gmail.com', [Validators.required, Validators.email]],
+      documentNumber: ['123456789', Validators.required],
       ispassport: [false]
     }));
     this.updatePassengerCount();

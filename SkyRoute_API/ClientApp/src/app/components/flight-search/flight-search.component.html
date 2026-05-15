@@ -20,6 +20,7 @@
         <div class="search-section">
           <h2>Search Flights</h2>
           <form [formGroup]="searchForm" (ngSubmit)="onSearch()">
+            <!-- ORIGIN AND DESTINATION -->
             <div class="row">
               <!-- ORIGIN COLUMN -->
               <div class="col">
@@ -49,7 +50,7 @@
                   <option [ngValue]="a.id">{{ a.name }} ({{ a.codeIATA }})</option> }
                 </select>
               </div>
-
+              <!-- END OF ORIGIN COLUMN -->
               <!-- DESTINATION COLUMN -->
               <div class="col">
                 <label>Destination Country</label>
@@ -78,8 +79,9 @@
                   <option [ngValue]="a.id">{{ a.name }} ({{ a.codeIATA }})</option> }
                 </select>
               </div>
+              <!-- END OF DESTINATION COLUMN -->
             </div>
-
+            <!-- END OFORIGIN AND DESTINATION -->
             <div class="row row-mt">
               <div class="col">
                 <label>Cabin Type</label>
@@ -97,6 +99,12 @@
                 <label>Seats</label>
                 <input type="number" formControlName="minimumFreeSeats">
               </div>
+              <!-- EXPERIMENT -->
+              <div class="col">
+                <label>Maximum price</label>
+                <input type="number" formControlName="maximumPrice">
+              </div>
+              <!-- EXPERIMENT -->
             </div>
 
             <button type="submit" class="search-btn"
@@ -133,9 +141,14 @@
                 <th class="sort-header" (click)="setSort('durationMinutes')">
                   Duration {{ sortState().key === 'durationMinutes' ? (sortState().dir === 'asc' ? '↑' : '↓') : '↕' }}
                 </th>
-                <th class="sort-header" (click)="setSort('priceTotal')">
-                  Price {{ sortState().key === 'priceTotal' ? (sortState().dir === 'asc' ? '↑' : '↓') : '↕' }}
+                <!-- EXPERIMENT -->
+                <th class="sort-header" (click)="setSort('pricePerPerson')">
+                  Price per seat {{ sortState().key === 'pricePerPerson' ? (sortState().dir === 'asc' ? '↑' : '↓') : '↕' }}
                 </th>
+                <th class="sort-header" (click)="setSort('priceTotal')">
+                  Price total {{ sortState().key === 'priceTotal' ? (sortState().dir === 'asc' ? '↑' : '↓') : '↕' }}
+                </th>
+                <!-- EXPERIMENT -->
                 <th class="sort-header" (click)="setSort('seatsFree')">
                   Availability {{ sortState().key === 'seatsFree' ? (sortState().dir === 'asc' ? '↑' : '↓') : '↕' }}
                 </th>
@@ -173,7 +186,10 @@
                   </div>
                 </td>
                 <td>{{ formatDuration(flight.durationMinutes) }}</td>
+                <!-- EXPERIMENT -->
+                <td>${{ flight.pricePerPerson }}</td>
                 <td><strong>${{ flight.priceTotal }}</strong></td>
+                <!-- EXPERIMENT -->
                 <td>{{ flight.seatsFree }} left</td>
                 <td><button class="book-btn" (click)="goToBooking(flight)">Book</button></td>
               </tr>
@@ -270,7 +286,9 @@
                 </div>
 
                 <div class="form-footer-actions">
-                  <button type="button" class="add-p-btn" (click)="addPassenger()">+ Add Passenger</button>
+                  <button type="button" class="add-p-btn" (click)="addPassenger()" [style.visibility]="(passengers.length >= 9 || passengers.length >= selectedFlight().seatsFree) ? 'hidden' : 'visible'">
+                  + Add Passenger
+                  </button>
                   <button type="button" class="confirm-p-btn" [disabled]="bookingForm.invalid || bookingLoading()" (click)="confirmBooking()">
                     {{ bookingLoading() ? 'Processing...' : 'Confirm Booking' }}
                   </button>

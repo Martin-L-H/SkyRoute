@@ -22,7 +22,7 @@ public class BookingRepository : IBookingRepository
 
         using var context = await _contextFactory.CreateDbContextAsync();
 
-        using var transaction = await context.Database.BeginTransactionAsync();
+        using var transaction = await context.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
 
         try
 

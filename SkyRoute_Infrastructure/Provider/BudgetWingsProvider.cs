@@ -15,7 +15,7 @@ public class BudgetWingsProvider : IFlightProvider
     public async Task<IEnumerable<FlightSearchResponseDTO>> GetFlightsAsync(FlightSearchRequestDTO requestDTO)
     {
 
-        var rawFlights = await _flightRepo.SearchSpecificFlightsAsync(
+        IEnumerable<Flight> rawFlights = await _flightRepo.SearchSpecificFlightsAsync(
             requestDTO.AirportOriginId,
             requestDTO.CityOriginId,
             requestDTO.CountryOriginId,
@@ -27,7 +27,7 @@ public class BudgetWingsProvider : IFlightProvider
             requestDTO.DurationMinutes,
             requestDTO.minimumFreeSeats);
 
-        var preFilteredDTO = rawFlights
+        IEnumerable<FlightSearchResponseDTO> preFilteredDTO = rawFlights
             .Where(f => f.ProviderName == PROVIDER_NAME)
             .Select(f => new FlightSearchResponseDTO
             (
@@ -58,8 +58,13 @@ public class BudgetWingsProvider : IFlightProvider
                 seatsFree: f.SeatsFree,
                 durationMinutes: f.DurationMinutes
             ));
+        //Ugly code. The list of flights is obtained then filtered by the maximum allowed price, but because
+        //this has to be done after the discount or overcharge calculation, it cannot be made in the repository
+        if (requestDTO.maximumPrice != null && requestDTO.maximumPrice > 0)
+        {
+            preFilteredDTO = preFilteredDTO.Where(x => x.priceTotal <= requestDTO.maximumPrice);
+        }
         return preFilteredDTO;
-
     }
 
     public decimal GetPricingPerPerson(decimal baseFare)
