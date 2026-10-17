@@ -84,10 +84,26 @@ public sealed class BookingRaceConditionTests
 
         var report = new RaceReport(attempts, succeeded, rejected, faulted, faults.ToDictionary(p => p.Key, p => p.Value), clock.Elapsed);
         WriteReport(report);
+        WriteRepositoryBreakdown(host.Logs, report);
 
         Assert.Equal(attempts, report.Succeeded + report.Rejected + report.Faulted);
         var summary = await BookingScenario.AssertInvariantsAsync(host.Services, seed, report);
         _output.WriteLine(summary);
+    }
+
+    // Splits "rejected" into its causes using the repository's log events. If deadlocks are the cause of the
+    // failures you suspect, "deadlock victims" is large; "no seats" is the legitimate rejection.
+    private void WriteRepositoryBreakdown(BookingLogCounter logs, RaceReport r)
+    {
+        var noSeats = logs.Count(BookingLogCounter.NoSeats);
+        var deadlocks = logs.Count(BookingLogCounter.Deadlock);
+        var other = logs.Count(BookingLogCounter.OtherException);
+
+        _output.WriteLine("repository breakdown of rejected callers:");
+        _output.WriteLine($"  no seats / flight not found : {noSeats:N0}");
+        _output.WriteLine($"  DEADLOCK VICTIMS (err 1205) : {deadlocks:N0}");
+        _output.WriteLine($"  other exceptions            : {other:N0}");
+        _output.WriteLine($"  unaccounted (rejected - sum): {r.Rejected - noSeats - deadlocks - other:N0}");
     }
 
     private void WriteReport(RaceReport r)
