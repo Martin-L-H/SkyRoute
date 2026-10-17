@@ -86,7 +86,8 @@ public sealed class BookingRaceConditionTests
         WriteReport(report);
 
         Assert.Equal(attempts, report.Succeeded + report.Rejected + report.Faulted);
-        await BookingScenario.AssertInvariantsAsync(host.Services, seed, report);
+        var summary = await BookingScenario.AssertInvariantsAsync(host.Services, seed, report);
+        _output.WriteLine(summary);
     }
 
     private void WriteReport(RaceReport r)

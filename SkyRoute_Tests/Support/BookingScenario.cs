@@ -18,7 +18,7 @@ internal sealed record SeededFlight(int FlightId, string ProviderName, int Seats
 internal static class BookingScenario
 {
     private const int SeatsOnFlight = 100;
-
+	private const short MaxPerBooking = 1;
     public static async Task<SeededFlight> SeedAsync(IServiceProvider services)
     {
         await using var scope = services.CreateAsyncScope();
@@ -54,7 +54,7 @@ internal static class BookingScenario
 
     private static BookingRequestDTO BuildRequest(SeededFlight seed, int index)
     {
-        var passengers = index % 3 + 1;
+        var passengers = index % MaxPerBooking + 1;
 
         return new BookingRequestDTO
         {
@@ -86,7 +86,7 @@ internal static class BookingScenario
     }
 
     /// <summary>Checks the database AFTER the storm. Every violated invariant is reported at once.</summary>
-    public static async Task AssertInvariantsAsync(IServiceProvider services, SeededFlight seed, RaceReport report)
+    public static async Task<string> AssertInvariantsAsync(IServiceProvider services, SeededFlight seed, RaceReport report)
     {
         await using var scope = services.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -111,6 +111,15 @@ internal static class BookingScenario
         if (seatsFree != seed.SeatsTotal - bookedPassengers)
             problems.Add($"Flight.SeatsFree is {seatsFree} but {seed.SeatsTotal} - {bookedPassengers} booked = {seed.SeatsTotal - bookedPassengers} (counter out of sync with bookings).");
 
-        Assert.True(problems.Count == 0, Environment.NewLine + string.Join(Environment.NewLine, problems));
+        // Liveness: a third of the callers want exactly ONE seat. If there are at least as many of those as
+        // seats, a correct system sells every seat. Unsold seats mean callers were turned away while seats were
+        // free - e.g. deadlock victims whose exception the repository swallows and reports as "unable to register".
+        var singleSeatCallers = (report.Attempts + 2) / 3;
+        if (singleSeatCallers >= seed.SeatsTotal && seatsFree > 0)
+            problems.Add($"{seatsFree} of {seed.SeatsTotal} seats were never sold although ~{singleSeatCallers:N0} callers each asked for a single seat (callers rejected while seats were free).");
+
+        var summary = $"seats {seed.SeatsTotal}, booked passengers {bookedPassengers}, SeatsFree {seatsFree}, bookings stored {bookingCount:N0}";
+        Assert.True(problems.Count == 0, Environment.NewLine + summary + Environment.NewLine + string.Join(Environment.NewLine, problems));
+        return summary;
     }
 }

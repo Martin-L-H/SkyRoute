@@ -7,7 +7,7 @@ using SkyRoute_Infrastructure.Context;
 namespace SkyRoute_Tests.Support;
 
 /// <summary>
-/// Builds a DI container the way the API would: AppDbContext on the test database, and every
+/// Builds a DI container the way the API would: AppDbContext (via a context factory) on the test database, and every
 /// interface declared in SkyRoute_Application mapped (scoped) to its implementation found in
 /// SkyRoute_Application or SkyRoute_Infrastructure.
 /// </summary>
@@ -29,8 +29,11 @@ internal sealed class TestHost : IAsyncDisposable
 
         var services = new ServiceCollection();
         services.AddLogging();
+        // Your repositories take IDbContextFactory<AppDbContext>, so register the factory. A plain scoped
+        // AppDbContext is added too (only if absent) for anything that injects the context directly.
         services.AddDbContextFactory<AppDbContext>(options => database.Configure(options));
-        services.TryAddScoped<AppDbContext>(sp => sp.GetRequiredService<IDbContextFactory<AppDbContext>>().CreateDbContext());
+        services.TryAddScoped<AppDbContext>(sp =>
+            sp.GetRequiredService<IDbContextFactory<AppDbContext>>().CreateDbContext());
 
         var applicationAssembly = Assembly.Load("SkyRoute_Application");
         var infrastructureAssembly = typeof(AppDbContext).Assembly;

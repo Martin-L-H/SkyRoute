@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-using Testcontainers.MsSql;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Testcontainers.MsSql;
 
 namespace SkyRoute_Tests.Support;
 
@@ -31,8 +31,10 @@ internal sealed class TestDatabase : IAsyncDisposable
     }
 
     public void Configure(DbContextOptionsBuilder options) => options
-    .UseSqlServer(_connectionString)
-    .ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
+        .UseSqlServer(_connectionString)
+        // EF 9+ refuses to Migrate() when the model has changes that no migration covers. The test then runs
+        // against the schema your migrations really produce (what production has). To see what is missing: dotnet ef migrations add Check
+        .ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
 
     public ValueTask DisposeAsync() => _container.DisposeAsync();
 }
