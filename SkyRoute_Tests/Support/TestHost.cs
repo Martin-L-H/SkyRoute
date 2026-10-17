@@ -2,7 +2,6 @@ using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using SkyRoute_Infrastructure.Context;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace SkyRoute_Tests.Support;
 
@@ -29,9 +28,7 @@ internal sealed class TestHost : IAsyncDisposable
 
         var services = new ServiceCollection();
         services.AddLogging();
-        services.AddDbContextFactory<AppDbContext>(options => database.Configure(options));
-        services.TryAddScoped<AppDbContext>(sp =>
-            sp.GetRequiredService<IDbContextFactory<AppDbContext>>().CreateDbContext());
+        services.AddDbContext<AppDbContext>(options => database.Configure(options));
 
         var applicationAssembly = Assembly.Load("SkyRoute_Application");
         var infrastructureAssembly = typeof(AppDbContext).Assembly;

@@ -1,47 +1,35 @@
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Testcontainers.MsSql;
 
 namespace SkyRoute_Tests.Support;
 
-/// <summary>
-/// In-RAM SQLite using a named shared-cache database. A keep-alive connection holds the
-/// database open; every DbContext opens its own connection to the same in-memory store.
-/// NOTE: SQLite allows one writer at a time, so it can serialize (and therefore hide) some
-/// races. Use -Database SqlServer / Postgres for a faithful isolation-level test.
-/// </summary>
+/// <summary>Real SQL Server in a throwaway Docker container (requires Docker running).</summary>
 internal sealed class TestDatabase : IAsyncDisposable
 {
-    private readonly SqliteConnection _keepAlive;
+    private readonly MsSqlContainer _container;
     private readonly string _connectionString;
 
-    private TestDatabase(string connectionString, SqliteConnection keepAlive)
+    private TestDatabase(MsSqlContainer container, string connectionString)
     {
+        _container = container;
         _connectionString = connectionString;
-        _keepAlive = keepAlive;
     }
 
-    public bool UseMigrations => false; // migrations may contain provider-specific SQL; build the schema from the model
+    public bool UseMigrations => true;
 
-    public static Task<TestDatabase> StartAsync()
+    public static async Task<TestDatabase> StartAsync()
     {
-        var connectionString = new SqliteConnectionStringBuilder
-        {
-            DataSource = "skyroute_" + Guid.NewGuid().ToString("N"),
-            Mode = SqliteOpenMode.Memory,
-            Cache = SqliteCacheMode.Shared,
-            DefaultTimeout = 600, // seconds: let lock waiters queue instead of failing after 30s
-        }.ToString();
+        var container = new MsSqlBuilder()
+            .WithImage("mcr.microsoft.com/mssql/server:2022-latest")
+            .Build();
+        await container.StartAsync();
 
-        var keepAlive = new SqliteConnection(connectionString);
-        keepAlive.Open();
-        return Task.FromResult(new TestDatabase(connectionString, keepAlive));
+        // Default pool size is 100, so ~100 calls are truly in flight; the rest queue for a pooled connection.
+        // A long connect timeout lets those waiters queue instead of failing.
+        return new TestDatabase(container, container.GetConnectionString() + ";Connect Timeout=600");
     }
 
-    public void Configure(DbContextOptionsBuilder options) => options.UseSqlite(_connectionString);
+    public void Configure(DbContextOptionsBuilder options) => options.UseSqlServer(_connectionString);
 
-    public async ValueTask DisposeAsync()
-    {
-        await _keepAlive.DisposeAsync();
-        SqliteConnection.ClearAllPools();
-    }
+    public ValueTask DisposeAsync() => _container.DisposeAsync();
 }

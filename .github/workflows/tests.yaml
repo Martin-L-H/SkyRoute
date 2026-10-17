@@ -1,0 +1,117 @@
+# Save as: .github/workflows/tests.yaml
+name: Tests
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      race_count:
+        description: 'Concurrent callers for the CreateBookingAsync stress test'
+        required: false
+        default: '5000'
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+      DOTNET_NOLOGO: 1
+      # 1,000,000 callers is too heavy for a hosted runner; keep CI small. Raise it via "Run workflow".
+      SKYROUTE_RACE_COUNT: ${{ inputs.race_count || '5000' }}
+      SKYROUTE_RACE_TIMEOUT_MIN: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Run tests
+        run: >
+          dotnet test SkyRoute_Tests/SkyRoute_Tests.csproj
+          --configuration Release
+          --results-directory TestResults
+          --logger "trx;LogFileName=results.trx"
+          --logger "console;verbosity=detailed"
+
+      # Runs even when tests fail, so the results always show up on the run page.
+      - name: Publish results summary
+        if: always()
+        shell: pwsh
+        run: |
+          $trx = Get-ChildItem -Path TestResults -Filter *.trx -Recurse | Select-Object -First 1
+          if (-not $trx) {
+            "### Test results`nNo .trx file was produced (build or restore probably failed). See the 'Run tests' step." |
+              Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+            exit 0
+          }
+
+          [xml]$doc = Get-Content -Path $trx.FullName -Raw
+          $counters = $doc.TestRun.ResultSummary.Counters
+          $results = @($doc.TestRun.Results.UnitTestResult)
+
+          $lines = New-Object System.Collections.Generic.List[string]
+          $lines.Add('## Test results')
+          $lines.Add('')
+          $lines.Add("**Total:** $($counters.total) &nbsp; **Passed:** $($counters.passed) &nbsp; **Failed:** $($counters.failed) &nbsp; **Skipped/other:** $([int]$counters.total - [int]$counters.passed - [int]$counters.failed)")
+          $lines.Add('')
+          $lines.Add("Stress test size: ``SKYROUTE_RACE_COUNT=$env:SKYROUTE_RACE_COUNT``")
+          $lines.Add('')
+          $lines.Add('| Result | Test | Duration |')
+          $lines.Add('|---|---|---|')
+          foreach ($r in ($results | Sort-Object { $_.outcome -eq 'Passed' }, testName)) {
+            $icon = if ($r.outcome -eq 'Passed') { '✅' } elseif ($r.outcome -eq 'Failed') { '❌' } else { '⚠️' }
+            $name = ($r.testName -replace '^.*\.Tests?\.', '') -replace '\|', '\|'
+            $lines.Add("| $icon $($r.outcome) | ``$name`` | $($r.duration) |")
+          }
+          $lines.Add('')
+
+          function Clip([string]$text) {
+            if ($text.Length -gt 6000) { return $text.Substring(0, 6000) + "`n... (truncated)" }
+            return $text
+          }
+
+          foreach ($r in $results) {
+            $err = $r.Output.ErrorInfo.Message
+            $out = $r.Output.StdOut
+            if (-not $err -and -not $out) { continue }
+
+            $open = if ($r.outcome -ne 'Passed') { ' open' } else { '' }
+            $lines.Add("<details$open><summary><b>$($r.testName)</b> - $($r.outcome)</summary>")
+            $lines.Add('')
+            if ($err) {
+              $lines.Add('**Failure message**')
+              $lines.Add('```')
+              $lines.Add((Clip $err.Trim()))
+              $lines.Add('```')
+            }
+            if ($out) {
+              $lines.Add('**Test output** (stress-test report: succeeded / rejected / faulted)')
+              $lines.Add('```')
+              $lines.Add((Clip $out.Trim()))
+              $lines.Add('```')
+            }
+            $lines.Add('</details>')
+            $lines.Add('')
+          }
+
+          $lines -join "`n" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+
+      - name: Upload raw results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: TestResults/
+          if-no-files-found: ignore

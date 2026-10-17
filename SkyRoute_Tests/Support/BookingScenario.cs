@@ -18,7 +18,6 @@ internal sealed record SeededFlight(int FlightId, string ProviderName, int Seats
 internal static class BookingScenario
 {
     private const int SeatsOnFlight = 100;
-    private const int MaxPassengersPerBooking = 1;
 
     public static async Task<SeededFlight> SeedAsync(IServiceProvider services)
     {
@@ -55,7 +54,7 @@ internal static class BookingScenario
 
     private static BookingRequestDTO BuildRequest(SeededFlight seed, int index)
     {
-        var passengers = index % MaxPassengersPerBooking + 1;
+        var passengers = index % 3 + 1;
 
         return new BookingRequestDTO
         {
