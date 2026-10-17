@@ -284,7 +284,7 @@ namespace SkyRoute_Infrastructure.Migrations
 
                     b.Property<string>("ProviderName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("SeatsFree")
                         .HasColumnType("int");
@@ -303,6 +303,8 @@ namespace SkyRoute_Infrastructure.Migrations
                     b.HasIndex("AirportDestinationId");
 
                     b.HasIndex("AirportOriginId");
+
+                    b.HasIndex("ProviderName");
 
                     b.ToTable("Flights");
 
@@ -392,7 +394,7 @@ namespace SkyRoute_Infrastructure.Migrations
                     b.HasOne("SkyRoute_Domain.Entities.Flight", "Flight")
                         .WithMany()
                         .HasForeignKey("FlightId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Flight");

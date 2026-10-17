@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Testcontainers.MsSql;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace SkyRoute_Tests.Support;
 
@@ -29,7 +30,9 @@ internal sealed class TestDatabase : IAsyncDisposable
         return new TestDatabase(container, container.GetConnectionString() + ";Connect Timeout=600");
     }
 
-    public void Configure(DbContextOptionsBuilder options) => options.UseSqlServer(_connectionString);
+    public void Configure(DbContextOptionsBuilder options) => options
+    .UseSqlServer(_connectionString)
+    .ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
 
     public ValueTask DisposeAsync() => _container.DisposeAsync();
 }
